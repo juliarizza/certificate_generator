@@ -1,0 +1,23 @@
+## Logs & Backups
+*.log
+*.pyc
+__pycache__
+
+## Database
+*.db
+
+## Folders
+signatures/*.png
+
+## Uploaded logos
+logo.png
+logo.jpg
+logo.gif
+
+## Local configs
+*.ini
+
+## "Temporary" files
+temp_front.html
+temp_back.html
+temp_resp.html

@@ -1,0 +1,20 @@
+<body style="background: url(images/background.png) repeat; font-family: Arial;">
+    <img src="images/{logo}" alt="Logo da instituicao" style="max-width: 300px; position: absolute; left: 100px; top: 50px;">
+    <center><h1 style="font-size: 72px; margin-top: 250px;">Certificado</h1></center>
+    <p style="margin: 50px 150px; font-size: 36px; text-align: justify; line-height: 150%;">Certificamos que <b>{name}</b>, portador(a) do CPF de numero <b>{register}</b>, participou do/a <b>{event}</b> entre os dias {start_date} e {end_date}, totalizando <b>{hours} hora(s)</b>, realizado pelo/a <b>{institution}</b>, de CNPJ <b>{inst_register}</b>.</p>
+
+    <div style="width: 30%; position: absolute; left: 200px; bottom: 100px;">
+        <center><img src="signatures/{institution_sig}.png"></center>
+        <hr/>
+        <center style="font-size:24px;">{role}</center>
+    </div>
+    <div style="width: 30%; position: absolute; left: 800px; bottom: 100px;">
+        <center><img src="signatures/{responsible_sig}.png"></center>
+        <hr/>
+        <center style="font-size:24px;">Ministrante</center>
+    </div>
+
+    <div style="position: absolute; width: 100%; bottom: 20px;">
+        <center>{date}</center>
+    </div>
+</body>
