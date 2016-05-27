@@ -16,17 +16,6 @@ class Window(QtGui.QMainWindow):
         self.setCentralWidget(self.central_widget)
         #self.setWindowIcon(QtGui.QIcon('images/favicon.png'))
 
-        ## File menu ##
-        preferencesAction = QtGui.QAction(u"&Preferências", self)
-        preferencesAction.setShortcut("Ctrl+P")
-        preferencesAction.setStatusTip(u"Preferências do app")
-        #preferencesAction.triggered.connect()
-
-        exitAction = QtGui.QAction("&Sair", self)
-        exitAction.setShortcut("Ctrl+Q")
-        exitAction.setStatusTip("Sair do app")
-        exitAction.triggered.connect(self.close_app)
-
         ## Institution menu ##
         dataAction = QtGui.QAction("&Dados", self)
         dataAction.setStatusTip(u"Modificar dados da instituição")
@@ -56,11 +45,9 @@ class Window(QtGui.QMainWindow):
         certificatesAction.triggered.connect(self.list_certificates)
 
         ## Help menu ##
-        termsAction = QtGui.QAction(u"&Termos e Condições", self)
-        termsAction.setStatusTip(u"Termos e condições de uso do app")
-
         licenseAction = QtGui.QAction(u"&Licença", self)
         licenseAction.setStatusTip(u"Licença do app")
+        licenseAction.triggered.connect(self.show_license)
 
         aboutAction = QtGui.QAction("&Sobre", self)
         aboutAction.setStatusTip(u"Mais informações sobre o app")
@@ -69,10 +56,6 @@ class Window(QtGui.QMainWindow):
         self.statusBar()
 
         mainMenu = self.menuBar()
-
-        fileMenu = mainMenu.addMenu("&Arquivo")
-        fileMenu.addAction(preferencesAction)
-        fileMenu.addAction(exitAction)
 
         institutionMenu = mainMenu.addMenu(u"&Instituição")
         institutionMenu.addAction(dataAction)
@@ -89,7 +72,6 @@ class Window(QtGui.QMainWindow):
         certificatesMenu.addAction(certificatesAction)
 
         helpMenu = mainMenu.addMenu("&Ajuda")
-        helpMenu.addAction(termsAction)
         helpMenu.addAction(licenseAction)
         helpMenu.addAction(aboutAction)
 
@@ -124,23 +106,30 @@ class Window(QtGui.QMainWindow):
         self.central_widget.setCurrentWidget(certificates_widget)
 
     def show_about(self):
-        about = QtGui.QDialog()
-        about.setGeometry(100,100,400,200)
-        about.setWindowTitle("Sobre o Certifica!")
-        about.setModal(True)
+        msg = u"""Um gerador de certificados para cursos livres e eventos feito em Python para gerar certificados em PDF e, inclusive, enviá-los por e-mail. É só cadastrar seu evento e logo em seguida seus participantes e, voilà, certificados emitidos!\n\nMais informações em: https://github.com/juliarizza/certificate_generator
+        """
+
+        about = QtGui.QMessageBox()
+        about.setGeometry(450,300,200,200)
+        about.setIcon(QtGui.QMessageBox.Information)
+        about.setText(u"Sobre o Certifica!")
+        about.setInformativeText(msg)
+        about.setWindowTitle(u"Sobre o Certifica!")
+        about.setStandardButtons(QtGui.QMessageBox.Ok)
         about.exec_()
 
-    def close_app(self):
-        choice = QtGui.QMessageBox.question(self, "Sair",
-                                            "Tem certeza que deseja sair?",
-                                            QtGui.QMessageBox.Yes |
-                                            QtGui.QMessageBox.No)
-        if choice == QtGui.QMessageBox.Yes:
-            conn.close()
-            sys.exit()
-        else:
-            pass
+    def show_license(self):
 
+        msg = u"""Copyright (c) 2016 Júlia Rizza & licensed under GNU GPLv3\n\nMais informações em: https://github.com/juliarizza/certificate_generator"""
+
+        license = QtGui.QMessageBox()
+        license.setGeometry(450,300,200,200)
+        license.setIcon(QtGui.QMessageBox.Information)
+        license.setText(u"Licença")
+        license.setInformativeText(msg)
+        license.setWindowTitle(u"Licença")
+        license.setStandardButtons(QtGui.QMessageBox.Ok)
+        license.exec_()
 
 def run():
     app = QtGui.QApplication(sys.argv)
