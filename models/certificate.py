@@ -36,6 +36,14 @@ def generate_certificate(path,cert_data):
                                                    months_pt[int(today.month)-1],
                                                    today.year)
 
+    content_lines = cert_data["content"].split("\n")
+    if not "<ul>" in cert_data["content"]:
+        new_content = "<ul>"
+        for line in content_lines:
+            new_content += unicode("<li>{line}</li>").format(line=line)
+        new_content += "</ul>"
+        cert_data["content"] = new_content
+
     cert_html = codecs.open("certificate_front.html","r","utf-8")
     content = cert_html.read().format(**cert_data)
     cert_html.close()
