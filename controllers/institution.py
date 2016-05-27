@@ -259,6 +259,7 @@ class SignaturesListWidget(QtGui.QWidget):
                                                       QtGui.QMessageBox.Yes |
                                                       QtGui.QMessageBox.No)
             if choice == QtGui.QMessageBox.Yes:
+                os.remove("signatures/{0}.png".format(str(sig_id)))
                 cursor.execute("DELETE FROM signatures WHERE id=?", str(sig_id))
                 conn.commit()
             else:
@@ -309,6 +310,8 @@ class SignaturesDialog(QtGui.QDialog):
         if not sig_name in os.listdir("signatures/"):
             self.sigUploadName = QtGui.QLabel(u"Faça o upload da assinatura", self)
             self.uploadLayout.addWidget(self.sigUploadName)
+        else:
+            self.sigUploadName = QtGui.QLabel("",self)
         self.formLayout.addRow(self.sigUpload, self.uploadLayout)
 
         self.errorMsg = QtGui.QLabel(u"",self)
@@ -327,6 +330,8 @@ class SignaturesDialog(QtGui.QDialog):
 
             self.sigNameLineEdit.setText(unicode(data[1]))
             self.sigRoleLineEdit.setText(unicode(data[2]))
+            self.sigEmailLineEdit.setText(unicode(data[3]))
+            self.sigRegisterLineEdit.setText(unicode(data[4]))
         else:
             self.setWindowTitle(u"Cadastrar assinatura")
             self.titleLabel = QtGui.QLabel(u"Cadastrar assinatura", self)
@@ -371,20 +376,41 @@ class SignaturesDialog(QtGui.QDialog):
                                unicode(self.sigRegisterLineEdit.text()),
                                unicode(self.sig_id)
                                ))
+
+                if self.filename:
+                    new_filename = "signatures/"+str(self.sig_id)+".png"
+                    copyfile(self.filename, new_filename)
+
+                conn.commit()
+                self.sig_list_instance.load_list()
+                self.hide()
             else:
-                cursor.execute("INSERT INTO signatures VALUES (NULL,?,?,?,?)",
-                              (
-                                unicode(self.sigNameLineEdit.text()),
-                                unicode(self.sigRoleLineEdit.text()),
-                                unicode(self.sigEmailLineEdit.text()),
-                                unicode(self.sigRegisterLineEdit.text())
-                              ))
-                self.sig_id = cursor.lastrowid
+                cursor.execute("SELECT id FROM signatures WHERE register=?",
+                              [str(self.sigRegisterLineEdit.text())])
+                existing_user = cursor.fetchone()
 
-            if self.filename:
-                new_filename = "signatures/"+str(self.sig_id)+".png"
-                copyfile(self.filename, new_filename)
+                if existing_user:
+                    error = QtGui.QMessageBox()
+                    error.setIcon(QtGui.QMessageBox.Critical)
+                    error.setText(u"A assinatura já está cadastrada!")
+                    error.setInformativeText(u"Já existe uma assinatura com este CPF cadastrada no programa.")
+                    error.setWindowTitle(u"Assinatura já cadastrada!")
+                    error.setStandardButtons(QtGui.QMessageBox.Ok)
+                    error.exec_()
+                else:
+                    cursor.execute("INSERT INTO signatures VALUES (NULL,?,?,?,?)",
+                                  (
+                                    unicode(self.sigNameLineEdit.text()),
+                                    unicode(self.sigRoleLineEdit.text()),
+                                    unicode(self.sigEmailLineEdit.text()),
+                                    unicode(self.sigRegisterLineEdit.text())
+                                  ))
+                    self.sig_id = cursor.lastrowid
 
-            conn.commit()
-            self.sig_list_instance.load_list()
-            self.hide()
+                    if self.filename:
+                        new_filename = "signatures/"+str(self.sig_id)+".png"
+                        copyfile(self.filename, new_filename)
+
+                    conn.commit()
+                    self.sig_list_instance.load_list()
+                    self.hide()

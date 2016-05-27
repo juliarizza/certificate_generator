@@ -174,13 +174,29 @@ class ClientDialog(QtGui.QDialog):
                                unicode(self.clientRegisterLineEdit.text()),
                                str(self.client_id)
                                ))
+                conn.commit()
+                self.clients_list_instance.load_table()
+                self.hide()
             else:
-                cursor.execute("INSERT INTO clients VALUES (NULL,?,?,?)",
-                              (
-                                unicode(self.clientNameLineEdit.text()),
-                                unicode(self.clientEmailLineEdit.text()),
-                                unicode(self.clientRegisterLineEdit.text())
-                              ))
-            conn.commit()
-            self.clients_list_instance.load_table()
-            self.hide()
+                cursor.execute("SELECT id FROM clients WHERE register=?",
+                              [str(self.clientRegisterLineEdit.text())])
+                existing_user = cursor.fetchone()
+
+                if existing_user:
+                    error = QtGui.QMessageBox()
+                    error.setIcon(QtGui.QMessageBox.Critical)
+                    error.setText(u"O cliente já está cadastrado!")
+                    error.setInformativeText(u"Já existe um cliente com este CPF cadastrado no programa.")
+                    error.setWindowTitle(u"Cliente já cadastrado!")
+                    error.setStandardButtons(QtGui.QMessageBox.Ok)
+                    error.exec_()
+                else:
+                    cursor.execute("INSERT INTO clients VALUES (NULL,?,?,?)",
+                                  (
+                                    unicode(self.clientNameLineEdit.text()),
+                                    unicode(self.clientEmailLineEdit.text()),
+                                    unicode(self.clientRegisterLineEdit.text())
+                                  ))
+                    conn.commit()
+                    self.clients_list_instance.load_table()
+                    self.hide()
