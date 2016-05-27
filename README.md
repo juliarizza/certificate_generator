@@ -23,7 +23,9 @@ git clone https://github.com/juliarizza/certificate_generator.git
 ```
 
 Instale as dependências
+
 *PyQt4 é uma dependência externa, verifique a instalação para seu sistema operacional*
+
 ```
 cd certificate_generator
 pip install -r requirements.txt
