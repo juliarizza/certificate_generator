@@ -10,10 +10,10 @@ class Mailer():
     def __init__(self):
         self.Config = ConfigParser.ConfigParser()
         self.Config.read("institution.ini")
-        self.server = str(self.Config.get("Mail", "server"))
+        self.server = unicode(self.Config.get("Mail", "server"))
         self.port = int(self.Config.get("Mail", "port"))
-        self.email = str(self.Config.get("Mail", "email"))
-        self.password = str(self.Config.get("Mail", "password"))
+        self.email = unicode(self.Config.get("Mail", "email"))
+        self.password = unicode(self.Config.get("Mail", "password"))
 
     def connect(self):
         self.smtp_server = smtplib.SMTP(self.server, self.port)
@@ -25,26 +25,25 @@ class Mailer():
         msg = MIMEMultipart()
         msg["From"] = self.email
         msg["To"] = send_to
-        msg["Subject"] = "Certificado"
+        msg["Subject"] = u"Certificado"
 
-        body = u"""
-        Em anexo a este e-mail encontra-se o seu certificado de participacao de um de nossos eventos. O certificado contem duas paginas, que sao sua frente e verso.
+        body = u"""Em anexo a este e-mail encontra-se o seu certificado de participação de um de nossos eventos. O certificado contém duas páginas, que são sua frente e verso.
 
         Qualquer problema, entre em contato respondendo a este e-mail ou procure-nos em:
         {address}
         Fone: {phone}
         """.format(
-                    address=str(self.Config.get("Contact","address")),
-                    phone=str(self.Config.get("Contact","phone"))
+                    address=unicode(self.Config.get("Contact","address")),
+                    phone=unicode(self.Config.get("Contact","phone"))
                   )
-        msg.attach(MIMEText(body,'plain'))
+        msg.attach(MIMEText(unicode(body),'plain', 'utf-8'))
 
-        attachment = open(path,"rb")
+        attachment = open(str(path),"rb")
         filename = path.split('/')[-1]
         part = MIMEBase('application', 'octet-stream')
-        part.set_payload((attachment).read())
+        part.set_payload(attachment.read())
         encoders.encode_base64(part)
-        part.add_header('Content-Disposition', "attachment; filename= %s" % filename)
+        part.add_header(u'Content-Disposition', "attachment; filename= %s" % filename)
         msg.attach(part)
 
         text = msg.as_string()

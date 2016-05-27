@@ -15,11 +15,11 @@ class ClientsListWidget(QtGui.QWidget):
         self.titleLabel = QtGui.QLabel(u"Clientes", self)
         self.titleLabel.setFont(titleFont)
 
-        self.addBtn = QtGui.QPushButton("Adicionar")
+        self.addBtn = QtGui.QPushButton(u"Adicionar")
         self.addBtn.clicked.connect(self.add_client)
-        self.editBtn = QtGui.QPushButton("Editar")
+        self.editBtn = QtGui.QPushButton(u"Editar")
         self.editBtn.clicked.connect(self.update_client)
-        self.removeBtn = QtGui.QPushButton("Remover")
+        self.removeBtn = QtGui.QPushButton(u"Remover")
         self.removeBtn.clicked.connect(self.remove_client)
         self.btnsLayout.addWidget(self.addBtn)
         self.btnsLayout.addWidget(self.editBtn)
@@ -32,7 +32,7 @@ class ClientsListWidget(QtGui.QWidget):
         self.listLayout.addWidget(self.clientsTable)
         self.listLayout.addLayout(self.btnsLayout)
 
-        self.errorMsg = QtGui.QLabel("",self)
+        self.errorMsg = QtGui.QLabel(u"",self)
         self.errorMsg.setStyleSheet("color: red; font-weight: bold;")
 
         self.mainLayout.addWidget(self.titleLabel)
@@ -61,7 +61,7 @@ class ClientsListWidget(QtGui.QWidget):
         r,c=0,0
         for item in data:
             for i in range(4):
-                newitem = QtGui.QTableWidgetItem(str(item[i]))
+                newitem = QtGui.QTableWidgetItem(unicode(item[i]))
                 self.clientsTable.setItem(r,c,newitem)
                 c += 1
             r += 1
@@ -75,8 +75,8 @@ class ClientsListWidget(QtGui.QWidget):
         try:
             r = self.clientsTable.currentRow()
             client_id = self.clientsTable.item(r,0).text()
-            choice = QtGui.QMessageBox.question(self, "Apagar cliente",
-                                                "Tem certeza que deseja apagar este cliente?",
+            choice = QtGui.QMessageBox.question(self, u"Apagar cliente",
+                                                u"Tem certeza que deseja apagar este cliente?",
                                                 QtGui.QMessageBox.Yes |
                                                 QtGui.QMessageBox.No)
             if choice == QtGui.QMessageBox.Yes:
@@ -86,7 +86,7 @@ class ClientsListWidget(QtGui.QWidget):
                 pass
             self.load_table()
         except AttributeError:
-            self.errorMsg.setText("Selecione um registro existente!")
+            self.errorMsg.setText(u"Selecione um registro existente!")
 
     def update_client(self):
         try:
@@ -95,7 +95,7 @@ class ClientsListWidget(QtGui.QWidget):
             self.edit_client_dialog = ClientDialog(self, client_id)
             self.edit_client_dialog.show()
         except AttributeError:
-            self.errorMsg.setText("Selecione um registro existente!")
+            self.errorMsg.setText(u"Selecione um registro existente!")
 
 class ClientDialog(QtGui.QDialog):
 
@@ -111,39 +111,39 @@ class ClientDialog(QtGui.QDialog):
 
         self.clientName = QtGui.QLabel(u"Nome completo", self)
         self.clientNameLineEdit = QtGui.QLineEdit(self)
-        self.clientNameLineEdit.setPlaceholderText("Ex: Fulano da Silva")
+        self.clientNameLineEdit.setPlaceholderText(u"Ex: Fulano da Silva")
         self.formLayout.addRow(self.clientName, self.clientNameLineEdit)
 
         self.clientEmail = QtGui.QLabel(u"E-mail", self)
         self.clientEmailLineEdit = QtGui.QLineEdit(self)
-        self.clientEmailLineEdit.setPlaceholderText("Ex: email@cliente.com")
+        self.clientEmailLineEdit.setPlaceholderText(u"Ex: email@cliente.com")
         self.formLayout.addRow(self.clientEmail, self.clientEmailLineEdit)
 
         self.clientRegister = QtGui.QLabel(u"CPF", self)
         self.clientRegisterLineEdit = QtGui.QLineEdit(self)
-        self.clientRegisterLineEdit.setInputMask("999.999.999-99") ## Brazil CPF
+        self.clientRegisterLineEdit.setInputMask(u"999.999.999-99") ## Brazil CPF
         self.formLayout.addRow(self.clientRegister, self.clientRegisterLineEdit)
 
-        self.errorMsg = QtGui.QLabel("",self)
+        self.errorMsg = QtGui.QLabel(u"",self)
         self.errorMsg.setStyleSheet("color: red; font-weight: bold;")
 
-        self.saveBtn = QtGui.QPushButton("Salvar")
+        self.saveBtn = QtGui.QPushButton(u"Salvar")
         self.saveBtn.clicked.connect(self.save_data)
 
         if self.client_id:
-            self.setWindowTitle("Editar cliente")
-            self.titleLabel = QtGui.QLabel("Editar cliente", self)
+            self.setWindowTitle(u"Editar cliente")
+            self.titleLabel = QtGui.QLabel(u"Editar cliente", self)
             self.titleLabel.setFont(titleFont)
 
             cursor.execute("SELECT * FROM clients WHERE id=?", str(self.client_id))
             data = cursor.fetchone()
 
-            self.clientNameLineEdit.setText(str(data[1]))
-            self.clientEmailLineEdit.setText(str(data[2]))
-            self.clientRegisterLineEdit.setText(str(data[3]))
+            self.clientNameLineEdit.setText(unicode(data[1]))
+            self.clientEmailLineEdit.setText(unicode(data[2]))
+            self.clientRegisterLineEdit.setText(unicode(data[3]))
         else:
-            self.setWindowTitle("Cadastrar cliente")
-            self.titleLabel = QtGui.QLabel("Cadastrar cliente", self)
+            self.setWindowTitle(u"Cadastrar cliente")
+            self.titleLabel = QtGui.QLabel(u"Cadastrar cliente", self)
             self.titleLabel.setFont(titleFont)
 
         self.mainLayout.addWidget(self.titleLabel)
@@ -154,11 +154,11 @@ class ClientDialog(QtGui.QDialog):
         self.setLayout(self.mainLayout)
 
     def save_data(self):
-        if self.clientNameLineEdit.text() == "":
-            self.errorMsg.setText("O nome precisa estar preenchido!")
-        elif self.clientEmailLineEdit.text() == "":
-            self.errorMsg.setText("O email precisa estar preenchido!")
-        elif validar_cpf(self.clientRegisterLineEdit.text()) == False:
+        if unicode(self.clientNameLineEdit.text()) == "":
+            self.errorMsg.setText(u"O nome precisa estar preenchido!")
+        elif unicode(self.clientEmailLineEdit.text()) == "":
+            self.errorMsg.setText(u"O email precisa estar preenchido!")
+        elif unicode(validar_cpf(self.clientRegisterLineEdit.text())) == False:
             self.errorMsg.setText(u"O CPF é inválido!")
         else:
             if self.client_id:
@@ -169,17 +169,17 @@ class ClientDialog(QtGui.QDialog):
                                 register=?
                                 WHERE id=?
                                """,(
-                               str(self.clientNameLineEdit.text()),
-                               str(self.clientEmailLineEdit.text()),
-                               str(self.clientRegisterLineEdit.text()),
+                               unicode(self.clientNameLineEdit.text()),
+                               unicode(self.clientEmailLineEdit.text()),
+                               unicode(self.clientRegisterLineEdit.text()),
                                str(self.client_id)
                                ))
             else:
                 cursor.execute("INSERT INTO clients VALUES (NULL,?,?,?)",
                               (
-                                str(self.clientNameLineEdit.text()),
-                                str(self.clientEmailLineEdit.text()),
-                                str(self.clientRegisterLineEdit.text())
+                                unicode(self.clientNameLineEdit.text()),
+                                unicode(self.clientEmailLineEdit.text()),
+                                unicode(self.clientRegisterLineEdit.text())
                               ))
             conn.commit()
             self.clients_list_instance.load_table()

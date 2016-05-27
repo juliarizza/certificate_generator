@@ -27,24 +27,24 @@ class CertificatesWidget(QtGui.QWidget):
         self.combosLayoutH = QtGui.QHBoxLayout()
         self.generateBtnsLayout = QtGui.QHBoxLayout()
 
-        self.titleLabel = QtGui.QLabel("Certificados",self)
+        self.titleLabel = QtGui.QLabel(u"Certificados",self)
         self.titleLabel.setFont(titleFont)
 
-        self.addBtn = QtGui.QPushButton("Adicionar")
+        self.addBtn = QtGui.QPushButton(u"Adicionar")
         self.addBtn.clicked.connect(self.add_client)
-        self.removeBtn = QtGui.QPushButton("Remover")
+        self.removeBtn = QtGui.QPushButton(u"Remover")
         self.removeBtn.clicked.connect(self.remove_client)
         self.btnsLayout.addWidget(self.addBtn)
         self.btnsLayout.addWidget(self.removeBtn)
         self.btnsLayout.addStretch()
 
-        self.eventsListName = QtGui.QLabel("Selecione um evento:", self)
+        self.eventsListName = QtGui.QLabel(u"Selecione um evento:", self)
         self.eventsList = QtGui.QComboBox()
         for event in self.events:
-            self.eventsList.addItem(event[1])
+            self.eventsList.addItem(unicode(event[1]))
         self.eventsList.currentIndexChanged.connect(self.load_list)
 
-        self.subscriptionListName = QtGui.QLabel("Inscritos", self)
+        self.subscriptionListName = QtGui.QLabel(u"Inscritos", self)
         self.subscriptionList = QtGui.QListWidget()
         self.load_list()
 
@@ -53,15 +53,15 @@ class CertificatesWidget(QtGui.QWidget):
         self.institutionListName = QtGui.QLabel(u"Assinatura da instituição:", self)
         self.institutionList = QtGui.QComboBox()
         for sig in self.signatures:
-            self.responsibleList.addItem(str(sig[1]))
-            self.institutionList.addItem(str(sig[1]))
+            self.responsibleList.addItem(unicode(sig[1]))
+            self.institutionList.addItem(unicode(sig[1]))
 
-        self.errorMsg = QtGui.QLabel("",self)
+        self.errorMsg = QtGui.QLabel(u"",self)
         self.errorMsg.setStyleSheet("color: red; font-weight: bold;")
 
-        self.generateBtn = QtGui.QPushButton("Gerar!")
+        self.generateBtn = QtGui.QPushButton(u"Gerar!")
         self.generateBtn.clicked.connect(self.generate)
-        self.generateSendBtn = QtGui.QPushButton("Gerar e enviar por email!")
+        self.generateSendBtn = QtGui.QPushButton(u"Gerar e enviar por email!")
         self.generateSendBtn.clicked.connect(self.generate_send)
         self.generateBtnsLayout.addWidget(self.generateBtn)
         self.generateBtnsLayout.addWidget(self.generateSendBtn)
@@ -101,8 +101,8 @@ class CertificatesWidget(QtGui.QWidget):
         self.subscriptionList.clear()
         for client in self.clients:
             cursor.execute("SELECT name FROM clients WHERE id=?",str(client[1]))
-            client_name = cursor.fetchone()[0]
-            self.subscriptionList.addItem(str(client_name))
+            client_name = unicode(cursor.fetchone()[0])
+            self.subscriptionList.addItem(client_name)
 
     def add_client(self):
         try:
@@ -110,7 +110,7 @@ class CertificatesWidget(QtGui.QWidget):
             self.add_client_widget = AddClientDialog(self, event_id)
             self.add_client_widget.show()
         except IndexError:
-            self.errorMsg.setText("Selecione um evento existente!")
+            self.errorMsg.setText(u"Selecione um evento existente!")
 
     def remove_client(self):
         try:
@@ -127,43 +127,43 @@ class CertificatesWidget(QtGui.QWidget):
                 pass
             self.load_list()
         except IndexError:
-            self.errorMsg.setText("Selecione um cliente existente!")
+            self.errorMsg.setText(u"Selecione um cliente existente!")
 
     def generate(self):
         if len(self.clients) == 0:
-            self.errorMsg.setText("Primeiro inscreva clientes!")
+            self.errorMsg.setText(u"Primeiro inscreva clientes!")
         else:
             self.save_folder = QtGui.QFileDialog.getExistingDirectory(None,
-                                                                "Salvar em")
+                                                                u"Salvar em")
 
-            self.cert_data = {"event": self.events[self.eventsList.currentIndex()][1].upper(),
-                         "start_date": self.events[self.eventsList.currentIndex()][2],
-                         "end_date": self.events[self.eventsList.currentIndex()][3],
-                         "hours": self.events[self.eventsList.currentIndex()][4],
-                         "content": self.events[self.eventsList.currentIndex()][5].upper(),
-                         "responsible_sig": self.signatures[self.responsibleList.currentIndex()][0],
-                         "institution_sig": self.signatures[self.institutionList.currentIndex()][0],
-                         "role": self.signatures[self.institutionList.currentIndex()][2],
-                         "institution": str(self.Config.get("Main","Name")).upper(),
-                         "inst_register": str(self.Config.get("Main","ID"))}
+            self.cert_data = {"event": unicode(self.events[self.eventsList.currentIndex()][1]).upper(),
+                         "start_date": unicode(self.events[self.eventsList.currentIndex()][2]),
+                         "end_date": unicode(self.events[self.eventsList.currentIndex()][3]),
+                         "hours": unicode(self.events[self.eventsList.currentIndex()][4]),
+                         "content": unicode(self.events[self.eventsList.currentIndex()][5]).upper(),
+                         "responsible_sig": unicode(self.signatures[self.responsibleList.currentIndex()][0]),
+                         "institution_sig": unicode(self.signatures[self.institutionList.currentIndex()][0]),
+                         "role": unicode(self.signatures[self.institutionList.currentIndex()][2]),
+                         "institution": unicode(self.Config.get("Main","Name")).upper(),
+                         "inst_register": unicode(self.Config.get("Main","ID"))}
 
             for client in self.clients:
                 cursor.execute("SELECT name,register FROM clients WHERE id=?",str(client[1]))
                 client_data = cursor.fetchone()
-                self.cert_data["name"] = str(client_data[0]).upper()
-                self.cert_data["register"] = str(client_data[1])
+                self.cert_data["name"] = unicode(client_data[0]).upper()
+                self.cert_data["register"] = unicode(client_data[1])
                 generate_certificate(self.save_folder, self.cert_data)
 
             cursor.execute("SELECT * FROM signatures WHERE id=?",
                            str(self.signatures[self.responsibleList.currentIndex()][0]))
             responsible = cursor.fetchone()
-            self.cert_data["name"] = str(responsible[1]).upper()
-            self.cert_data["register"] = str(responsible[4]).upper()
+            self.cert_data["name"] = unicode(responsible[1]).upper()
+            self.cert_data["register"] = unicode(responsible[4]).upper()
             generate_certificate_responsible(self.save_folder, self.cert_data)
 
     def generate_send(self):
         if len(self.clients) == 0:
-            self.errorMsg.setText("Primeiro inscreva clientes!")
+            self.errorMsg.setText(u"Primeiro inscreva clientes!")
         else:
             self.generate()
             self.mailer = Mailer()
@@ -172,14 +172,17 @@ class CertificatesWidget(QtGui.QWidget):
                 cursor.execute("SELECT name,email FROM clients WHERE id=?",str(client[1]))
                 client_data = cursor.fetchone()
 
-                filepath = self.save_folder+"/"+client_data[0].replace(" ","").upper()+".pdf"
-                self.mailer.send_certificate(filepath,client_data[1])
+                filepath = self.save_folder+"/"
+                filepath += ''.join(i for i in unicode(client_data[0]) if ord(i)<128).upper()
+                filepath += ".pdf"
+                filepath.replace(" ","")
+                self.mailer.send_certificate(filepath,unicode(client_data[1]))
 
             cursor.execute("SELECT name,email FROM signatures WHERE id=?",
-                           self.signatures[self.responsibleList.currentIndex()][0])
+                           str(self.signatures[self.responsibleList.currentIndex()][0]))
             responsible = cursor.fetchone()
             filepath = self.save_folder+"/responsible.pdf"
-            self.mailer.send_certificate(filepath,responsible[3])
+            self.mailer.send_certificate(filepath,unicode(responsible[1]))
 
             self.mailer.quit()
 
@@ -195,14 +198,14 @@ class AddClientDialog(QtGui.QDialog):
 
         self.mainLayout = QtGui.QVBoxLayout()
 
-        self.titleLabel = QtGui.QLabel("Selecione um cliente")
+        self.titleLabel = QtGui.QLabel(u"Selecione um cliente")
         self.titleLabel.setFont(titleFont)
 
         self.clientsList = QtGui.QComboBox()
         for client in self.clients:
-            self.clientsList.addItem(str(client[1]))
+            self.clientsList.addItem(unicode(client[1]))
 
-        self.saveBtn = QtGui.QPushButton("Selecionar")
+        self.saveBtn = QtGui.QPushButton(u"Selecionar")
         self.saveBtn.clicked.connect(self.add_client)
 
         self.mainLayout.addWidget(self.titleLabel)

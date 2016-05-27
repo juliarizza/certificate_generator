@@ -15,11 +15,11 @@ class EventsListWidget(QtGui.QWidget):
         self.titleLabel = QtGui.QLabel(u"Eventos", self)
         self.titleLabel.setFont(titleFont)
 
-        self.addBtn = QtGui.QPushButton("Adicionar")
+        self.addBtn = QtGui.QPushButton(u"Adicionar")
         self.addBtn.clicked.connect(self.add_event)
-        self.editBtn = QtGui.QPushButton("Editar")
+        self.editBtn = QtGui.QPushButton(u"Editar")
         self.editBtn.clicked.connect(self.update_event)
-        self.removeBtn = QtGui.QPushButton("Remover")
+        self.removeBtn = QtGui.QPushButton(u"Remover")
         self.removeBtn.clicked.connect(self.remove_event)
         self.btnsLayout.addWidget(self.addBtn)
         self.btnsLayout.addWidget(self.editBtn)
@@ -32,7 +32,7 @@ class EventsListWidget(QtGui.QWidget):
         self.listLayout.addWidget(self.eventsTable)
         self.listLayout.addLayout(self.btnsLayout)
 
-        self.errorMsg = QtGui.QLabel("",self)
+        self.errorMsg = QtGui.QLabel(u"",self)
         self.errorMsg.setStyleSheet("color: red; font-weight: bold;")
 
         self.mainLayout.addWidget(self.titleLabel)
@@ -61,7 +61,7 @@ class EventsListWidget(QtGui.QWidget):
         r,c=0,0
         for item in data:
             for i in range(4):
-                newitem = QtGui.QTableWidgetItem(str(item[i]))
+                newitem = QtGui.QTableWidgetItem(unicode(item[i]))
                 self.eventsTable.setItem(r,c,newitem)
                 c += 1
             r += 1
@@ -75,8 +75,8 @@ class EventsListWidget(QtGui.QWidget):
         try:
             r = self.eventsTable.currentRow()
             event_id = self.eventsTable.item(r,0).text()
-            choice = QtGui.QMessageBox.question(self, "Apagar evento",
-                                                "Tem certeza que deseja apagar este evento?",
+            choice = QtGui.QMessageBox.question(self, u"Apagar evento",
+                                                u"Tem certeza que deseja apagar este evento?",
                                                 QtGui.QMessageBox.Yes |
                                                 QtGui.QMessageBox.No)
             if choice == QtGui.QMessageBox.Yes:
@@ -86,7 +86,7 @@ class EventsListWidget(QtGui.QWidget):
                 pass
             self.load_table()
         except AttributeError:
-            self.errorMsg.setText("Selecione um registro existente!")
+            self.errorMsg.setText(u"Selecione um registro existente!")
 
     def update_event(self):
         try:
@@ -95,7 +95,7 @@ class EventsListWidget(QtGui.QWidget):
             self.edit_event_dialog = EventDialog(self, event_id)
             self.edit_event_dialog.show()
         except AttributeError:
-            self.errorMsg.setText("Selecione um registro existente!")
+            self.errorMsg.setText(u"Selecione um registro existente!")
 
 class EventDialog(QtGui.QDialog):
 
@@ -109,7 +109,7 @@ class EventDialog(QtGui.QDialog):
 
         self.eventTitle = QtGui.QLabel(u"Título", self)
         self.eventTitleLineEdit = QtGui.QLineEdit(self)
-        self.eventTitleLineEdit.setPlaceholderText("Ex: Curso de Excel")
+        self.eventTitleLineEdit.setPlaceholderText(u"Ex: Curso de Excel")
         self.formLayout.addRow(self.eventTitle, self.eventTitleLineEdit)
 
         self.eventContent = QtGui.QLabel(u"Conteúdo", self)
@@ -118,41 +118,41 @@ class EventDialog(QtGui.QDialog):
 
         self.eventStartDate = QtGui.QLabel(u"Data de Início", self)
         self.eventStartDateLineEdit = QtGui.QLineEdit(self)
-        self.eventStartDateLineEdit.setInputMask("99/99/9999")
+        self.eventStartDateLineEdit.setInputMask(u"99/99/9999")
         self.formLayout.addRow(self.eventStartDate, self.eventStartDateLineEdit)
 
         self.eventEndDate = QtGui.QLabel(u"Data de Término", self)
         self.eventEndDateLineEdit = QtGui.QLineEdit(self)
-        self.eventEndDateLineEdit.setInputMask("99/99/9999")
+        self.eventEndDateLineEdit.setInputMask(u"99/99/9999")
         self.formLayout.addRow(self.eventEndDate, self.eventEndDateLineEdit)
 
-        self.eventHours = QtGui.QLabel("Horas Totais", self)
+        self.eventHours = QtGui.QLabel(u"Horas Totais", self)
         self.eventHoursLineEdit = QtGui.QLineEdit(self)
-        self.eventHoursLineEdit.setPlaceholderText("Ex: 15")
+        self.eventHoursLineEdit.setPlaceholderText(u"Ex: 15")
         self.formLayout.addRow(self.eventHours, self.eventHoursLineEdit)
 
-        self.errorMsg = QtGui.QLabel("",self)
+        self.errorMsg = QtGui.QLabel(u"",self)
         self.errorMsg.setStyleSheet("color: red; font-weight: bold;")
 
-        self.saveBtn = QtGui.QPushButton("Salvar")
+        self.saveBtn = QtGui.QPushButton(u"Salvar")
         self.saveBtn.clicked.connect(self.save_data)
 
         if self.event_id:
-            self.setWindowTitle("Editar evento")
-            self.titleLabel = QtGui.QLabel("Editar evento", self)
+            self.setWindowTitle(u"Editar evento")
+            self.titleLabel = QtGui.QLabel(u"Editar evento", self)
             self.titleLabel.setFont(titleFont)
 
             cursor.execute("SELECT * FROM events WHERE id=?", str(self.event_id))
             data = cursor.fetchone()
 
-            self.eventTitleLineEdit.setText(str(data[1]))
-            self.eventStartDateLineEdit.setText(str(data[2]))
-            self.eventEndDateLineEdit.setText(str(data[3]))
-            self.eventHoursLineEdit.setText(str(data[4]))
-            self.eventContentTextEdit.setText(str(data[5]))
+            self.eventTitleLineEdit.setText(unicode(data[1]))
+            self.eventStartDateLineEdit.setText(unicode(data[2]))
+            self.eventEndDateLineEdit.setText(unicode(data[3]))
+            self.eventHoursLineEdit.setText(unicode(data[4]))
+            self.eventContentTextEdit.setText(unicode(data[5]))
         else:
-            self.setWindowTitle("Cadastrar evento")
-            self.titleLabel = QtGui.QLabel("Cadastrar evento", self)
+            self.setWindowTitle(u"Cadastrar evento")
+            self.titleLabel = QtGui.QLabel(u"Cadastrar evento", self)
             self.titleLabel.setFont(titleFont)
 
         self.mainLayout.addWidget(self.titleLabel)
@@ -163,13 +163,13 @@ class EventDialog(QtGui.QDialog):
         self.setLayout(self.mainLayout)
 
     def save_data(self):
-        if self.eventTitleLineEdit.text() == "":
-            self.errorMsg.setText("O titulo precisa ser preenchido!")
-        elif len(self.eventStartDateLineEdit.text()) < 10 or \
-                len(self.eventEndDateLineEdit.text()) < 10:
-            self.errorMsg.setText("As datas precisam estar em um formato xx/xx/xxxx!")
-        elif self.eventHoursLineEdit.text() == "":
-            self.errorMsg.setText("As horas precisam ser um inteiro!")
+        if unicode(self.eventTitleLineEdit.text()) == "":
+            self.errorMsg.setText(u"O título precisa ser preenchido!")
+        elif len(unicode(self.eventStartDateLineEdit.text())) < 10 or \
+                len(unicode(self.eventEndDateLineEdit.text())) < 10:
+            self.errorMsg.setText(u"As datas precisam estar em um formato xx/xx/xxxx!")
+        elif unicode(self.eventHoursLineEdit.text()) == "":
+            self.errorMsg.setText(u"As horas precisam ser um inteiro!")
         else:
             if self.event_id:
                 cursor.execute("""
@@ -181,21 +181,21 @@ class EventDialog(QtGui.QDialog):
                                 content=?
                                 WHERE id=?
                                 """, (
-                                str(self.eventTitleLineEdit.text()),
-                                str(self.eventStartDateLineEdit.text()),
-                                str(self.eventEndDateLineEdit.text()),
-                                str(self.eventHoursLineEdit.text()),
-                                str(self.eventContentTextEdit.toPlainText()),
+                                unicode(self.eventTitleLineEdit.text()),
+                                unicode(self.eventStartDateLineEdit.text()),
+                                unicode(self.eventEndDateLineEdit.text()),
+                                unicode(self.eventHoursLineEdit.text()),
+                                unicode(self.eventContentTextEdit.toPlainText()),
                                 str(self.event_id)
                                 ))
             else:
                 cursor.execute("INSERT INTO events VALUES (NULL,?,?,?,?,?)",
                                 (
-                                str(self.eventTitleLineEdit.text()),
-                                str(self.eventStartDateLineEdit.text()),
-                                str(self.eventEndDateLineEdit.text()),
-                                str(self.eventHoursLineEdit.text()),
-                                str(self.eventContentTextEdit.toPlainText())
+                                unicode(self.eventTitleLineEdit.text()),
+                                unicode(self.eventStartDateLineEdit.text()),
+                                unicode(self.eventEndDateLineEdit.text()),
+                                unicode(self.eventHoursLineEdit.text()),
+                                unicode(self.eventContentTextEdit.toPlainText())
                                 ))
             conn.commit()
             self.events_list_instance.load_table()
