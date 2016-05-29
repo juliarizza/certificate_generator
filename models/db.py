@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import sqlite3
 
-conn = sqlite3.connect("certifica.db")
+conn = sqlite3.connect("certifica.db", check_same_thread=False)
 cursor = conn.cursor()
 
 def createDB():

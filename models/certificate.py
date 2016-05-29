@@ -72,6 +72,7 @@ def generate_certificate(path,cert_data):
     os.remove(new_filename+"_back.pdf")
 
 def generate_certificate_responsible(path, cert_data):
+    generate_certificate(path,cert_data)
     new_filename = unicode(path+"/responsible.pdf")
 
     options = {"page-size":"A4",

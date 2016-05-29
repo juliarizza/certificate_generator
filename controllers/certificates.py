@@ -101,8 +101,9 @@ class CertificatesWidget(QtGui.QWidget):
         self.subscriptionList.clear()
         for client in self.clients:
             cursor.execute("SELECT name FROM clients WHERE id=?",str(client[1]))
-            client_name = unicode(cursor.fetchone()[0])
-            self.subscriptionList.addItem(client_name)
+            client_name = cursor.fetchone()
+            if client:
+                self.subscriptionList.addItem(unicode(client_name[0]))
 
     def add_client(self):
         try:
@@ -129,7 +130,7 @@ class CertificatesWidget(QtGui.QWidget):
         except IndexError:
             self.errorMsg.setText(u"Selecione um cliente existente!")
 
-    def generate(self):
+    def generate_general(self):
         if len(self.clients) == 0:
             self.errorMsg.setText(u"Primeiro inscreva clientes!")
         else:
@@ -147,49 +148,40 @@ class CertificatesWidget(QtGui.QWidget):
                          "institution": unicode(self.Config.get("Main","Name")).upper(),
                          "inst_register": unicode(self.Config.get("Main","ID"))}
 
-            for client in self.clients:
-                cursor.execute("SELECT name,register FROM clients WHERE id=?",str(client[1]))
-                client_data = cursor.fetchone()
-                self.cert_data["name"] = unicode(client_data[0]).upper()
-                self.cert_data["register"] = unicode(client_data[1])
-                generate_certificate(self.save_folder, self.cert_data)
-
             cursor.execute("SELECT * FROM signatures WHERE id=?",
-                           str(self.signatures[self.responsibleList.currentIndex()][0]))
-            responsible = cursor.fetchone()
-            self.cert_data["name"] = unicode(responsible[1]).upper()
-            self.cert_data["register"] = unicode(responsible[4]).upper()
-            generate_certificate_responsible(self.save_folder, self.cert_data)
+            str(self.signatures[self.responsibleList.currentIndex()][0]))
+            self.responsible = cursor.fetchone()
+
+    def generate(self):
+        self.generate_general()
+
+        self.generate_progress = GenerateCertificateProgress(self.save_folder,
+                                                             self.cert_data,
+                                                             self.clients,
+                                                             self.responsible
+                                                            )
+        self.generate_progress.show()
 
     def generate_send(self):
-        if len(self.clients) == 0:
-            self.errorMsg.setText(u"Primeiro inscreva clientes!")
-        else:
-            self.generate()
-            self.mailer = Mailer()
-            self.mailer.connect()
-            for client in self.clients:
-                cursor.execute("SELECT name,email FROM clients WHERE id=?",str(client[1]))
-                client_data = cursor.fetchone()
+        self.generate_general()
 
-                filepath = self.save_folder+"/"
-                filepath += ''.join(i for i in unicode(client_data[0]) if ord(i)<128).upper()
-                filepath += ".pdf"
-                filepath.replace(" ","")
-                self.mailer.send_certificate(filepath,unicode(client_data[1]))
+        cursor.execute("SELECT name,email FROM signatures WHERE id=?",
+                       str(self.signatures[self.responsibleList.currentIndex()][0]))
+        responsible = cursor.fetchone()
 
-            cursor.execute("SELECT name,email FROM signatures WHERE id=?",
-                           str(self.signatures[self.responsibleList.currentIndex()][0]))
-            responsible = cursor.fetchone()
-            filepath = self.save_folder+"/responsible.pdf"
-            self.mailer.send_certificate(filepath,unicode(responsible[1]))
-
-            self.mailer.quit()
+        self.generate_send_progress = GenerateSendProgress(self.save_folder,
+                                                           self.cert_data,
+                                                           self.clients,
+                                                           responsible
+                                                          )
+        self.generate_send_progress.show()
 
 class AddClientDialog(QtGui.QDialog):
 
     def __init__(self, certificates_instance, event_id):
         super(AddClientDialog,self).__init__()
+        self.setWindowTitle(u"Adicionar cliente")
+
         self.event_id = event_id
         self.certificates_instance = certificates_instance
 
@@ -223,3 +215,197 @@ class AddClientDialog(QtGui.QDialog):
         conn.commit()
         self.certificates_instance.load_list()
         self.hide()
+
+class GenerateCertificateProgress(QtGui.QDialog):
+
+    def __init__(self, save_folder, cert_data, clients, responsible):
+        super(GenerateCertificateProgress, self).__init__()
+        self.setWindowTitle(u"Gerando certificados")
+        self.setGeometry(450,300,400,200)
+
+        self.n = 0
+        self.total = len(clients)+1
+
+        self.generate_thread = GenerateThread()
+        self.generate_thread._get_info(save_folder, cert_data,
+        clients, responsible)
+        self.connect(self.generate_thread, QtCore.SIGNAL("finished()"), self.done)
+        self.connect(self.generate_thread, QtCore.SIGNAL("update"), self.update)
+
+        self.mainLayout = QtGui.QVBoxLayout()
+
+        self.titleLabel = QtGui.QLabel(u"Gerando certificados", self)
+        self.titleLabel.setFont(titleFont)
+
+        self.progress_bar = QtGui.QProgressBar()
+        self.progress_bar.setRange(0, 100)
+        self.status = QtGui.QLabel(u"Carregando...",self)
+
+        self.cancelBtn = QtGui.QPushButton(u"Cancelar")
+        self.cancelBtn.clicked.connect(self.generate_thread.terminate)
+
+        self.mainLayout.addWidget(self.titleLabel)
+        self.mainLayout.addWidget(self.progress_bar)
+        self.mainLayout.addWidget(self.status)
+        self.mainLayout.addWidget(self.cancelBtn)
+
+        self.generate_thread.start()
+
+        self.setLayout(self.mainLayout)
+
+    def update(self,step,n):
+        self.n += 100/self.total
+        self.progress_bar.setValue(int(self.n))
+        if step == 1:
+            self.status.setText(u"Gerando certificado {0}/{1}".format(n,
+                                                                      self.total-2
+                                                                      ))
+        elif step == 2:
+            self.status.setText(u"Gerando certificado do responsável")
+        elif step == 3:
+            self.progress_bar.setValue(100)
+            self.status.setText("Finalizando...")
+
+    def done(self):
+        self.message = QtGui.QMessageBox()
+        self.message.setIcon(QtGui.QMessageBox.Information)
+        self.message.setText(u"Todos os certificados foram gerados!")
+        self.message.setWindowTitle(u"Pronto!")
+        self.message.setStandardButtons(QtGui.QMessageBox.Ok)
+        self.message.exec_()
+        self.hide()
+
+
+class GenerateThread(QtCore.QThread):
+
+    def __init__(self):
+        super(GenerateThread, self).__init__()
+
+    def __del__(self):
+        self.wait()
+
+    def _get_info(self, save_folder, cert_data, clients, responsible):
+        self.save_folder = save_folder
+        self.cert_data = cert_data
+        self.clients = clients
+        self.responsible = responsible
+
+    def run(self):
+        n = 1
+        for client in self.clients:
+            cursor.execute("SELECT name,register FROM clients WHERE id=?",str(client[1]))
+            client_data = cursor.fetchone()
+            self.cert_data["name"] = unicode(client_data[0]).upper()
+            self.cert_data["register"] = unicode(client_data[1])
+            generate_certificate(self.save_folder, self.cert_data)
+            self.emit(QtCore.SIGNAL("update"),1,n)
+            n+=1
+
+        self.emit(QtCore.SIGNAL("update"),2,0)
+        self.cert_data["name"] = unicode(self.responsible[1]).upper()
+        self.cert_data["register"] = unicode(self.responsible[4]).upper()
+        generate_certificate_responsible(self.save_folder, self.cert_data)
+        self.emit(QtCore.SIGNAL("update"),3,0)
+
+class GenerateSendProgress(QtGui.QDialog):
+
+    def __init__(self, save_folder, cert_data, clients, responsible):
+        super(GenerateSendProgress, self).__init__()
+
+        self.setWindowTitle(u"Gerando & enviando certificados")
+        self.setGeometry(450,300,400,200)
+
+        self.n = 0
+        self.total = len(clients)+3
+
+        self.generate_send_thread = GenerateSendThread()
+        self.generate_send_thread._get_info(save_folder, cert_data,
+        clients, responsible)
+        self.connect(self.generate_send_thread, QtCore.SIGNAL("finished()"), self.done)
+        self.connect(self.generate_send_thread,
+                     QtCore.SIGNAL("update"),
+                     self.update)
+
+        self.mainLayout = QtGui.QVBoxLayout()
+
+        self.titleLabel = QtGui.QLabel(u"Gerando & enviando certificados", self)
+        self.titleLabel.setFont(titleFont)
+
+        self.progress_bar = QtGui.QProgressBar()
+        self.progress_bar.setRange(0, 100)
+        self.status = QtGui.QLabel(u"Carregando...",self)
+
+        self.cancelBtn = QtGui.QPushButton(u"Cancelar")
+        self.cancelBtn.clicked.connect(self.generate_send_thread.terminate)
+
+        self.mainLayout.addWidget(self.titleLabel)
+        self.mainLayout.addWidget(self.progress_bar)
+        self.mainLayout.addWidget(self.status)
+        self.mainLayout.addWidget(self.cancelBtn)
+
+        self.generate_send_thread.start()
+
+        self.setLayout(self.mainLayout)
+
+    def update(self,step,n):
+        self.n += 100/self.total
+        self.progress_bar.setValue(int(self.n))
+        if step == 1:
+            self.status.setText(u"Conectando...")
+        if step == 2:
+            self.status.setText(u"Gerando & enviando certificado {0}/{1}".format(n,
+                                                                      (self.total-3)
+                                                                     ))
+        if step == 3:
+            self.status.setText(u"Gerando & enviando certificado do responsável")
+        if step == 4:
+            self.progress_bar.setValue(100)
+            self.status.setText(u"Finalizando")
+
+    def done(self):
+        self.message = QtGui.QMessageBox()
+        self.message.setIcon(QtGui.QMessageBox.Information)
+        self.message.setText(u"Todos os certificados foram gerados e enviados!")
+        self.message.setWindowTitle(u"Pronto!")
+        self.message.setStandardButtons(QtGui.QMessageBox.Ok)
+        self.message.exec_()
+        self.hide()
+
+class GenerateSendThread(QtCore.QThread):
+
+    def __init__(self):
+        super(GenerateSendThread, self).__init__()
+
+    def __del__(self):
+        self.wait()
+
+    def _get_info(self, save_folder, cert_data, clients, responsible):
+        self.save_folder = save_folder
+        self.cert_data = cert_data
+        self.clients = clients
+        self.responsible = responsible
+
+    def run(self):
+        self.mailer = Mailer()
+        self.mailer.connect()
+        self.emit(QtCore.SIGNAL("update"),1,0)
+
+        n = 1
+        for client in self.clients:
+            cursor.execute("SELECT name,email FROM clients WHERE id=?",str(client[1]))
+            client_data = cursor.fetchone()
+
+            filepath = self.save_folder+"/"
+            filepath += ''.join(i for i in unicode(client_data[0]) if ord(i)<128).upper()
+            filepath += ".pdf"
+            filepath.replace(" ","")
+            self.emit(QtCore.SIGNAL("update"),2,n)
+            self.mailer.send_certificate(filepath,unicode(client_data[1]))
+            n+=1
+
+        self.emit(QtCore.SIGNAL("update"),3,0)
+        filepath = self.save_folder+"/responsible.pdf"
+        self.mailer.send_certificate(filepath,unicode(self.responsible[1]))
+
+        self.emit(QtCore.SIGNAL("update"),4,0)
+        self.mailer.quit()

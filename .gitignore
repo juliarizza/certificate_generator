@@ -8,6 +8,8 @@ __pycache__
 
 ## Folders
 signatures/*.png
+dist/*
+build/*
 
 ## Uploaded logos
 logo.png
