@@ -44,7 +44,7 @@ class ClientsListWidget(QtGui.QWidget):
     def load_table(self):
         self.clientsTable.clear()
 
-        cursor.execute("SELECT * FROM clients")
+        cursor.execute("SELECT * FROM clients ORDER BY name ASC")
         data = cursor.fetchall()
 
         if len(data) < 10:

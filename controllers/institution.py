@@ -233,7 +233,7 @@ class SignaturesListWidget(QtGui.QWidget):
     def load_list(self):
         self.signaturesList.clear()
 
-        cursor.execute("SELECT * FROM signatures")
+        cursor.execute("SELECT * FROM signatures ORDER BY name ASC")
         self.signatures = cursor.fetchall()
 
         for sig in self.signatures:

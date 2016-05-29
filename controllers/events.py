@@ -44,7 +44,7 @@ class EventsListWidget(QtGui.QWidget):
     def load_table(self):
         self.eventsTable.clear()
 
-        cursor.execute("SELECT * FROM events")
+        cursor.execute("SELECT * FROM events ORDER BY id DESC")
         data = cursor.fetchall()
 
         if len(data) < 10:

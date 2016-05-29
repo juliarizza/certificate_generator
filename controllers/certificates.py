@@ -13,10 +13,10 @@ class CertificatesWidget(QtGui.QWidget):
         self.Config = ConfigParser.ConfigParser()
         self.Config.read("institution.ini")
 
-        cursor.execute("SELECT * FROM events")
+        cursor.execute("SELECT * FROM events ORDER BY id DESC")
         self.events = cursor.fetchall()
 
-        cursor.execute("SELECT * FROM signatures")
+        cursor.execute("SELECT * FROM signatures ORDER BY name ASC")
         self.signatures = cursor.fetchall()
 
         self.mainLayout = QtGui.QVBoxLayout()
@@ -185,7 +185,7 @@ class AddClientDialog(QtGui.QDialog):
         self.event_id = event_id
         self.certificates_instance = certificates_instance
 
-        cursor.execute("SELECT * FROM clients")
+        cursor.execute("SELECT * FROM clients ORDER BY name ASC")
         self.clients = cursor.fetchall()
 
         self.mainLayout = QtGui.QVBoxLayout()
