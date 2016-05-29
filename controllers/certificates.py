@@ -59,10 +59,14 @@ class CertificatesWidget(QtGui.QWidget):
         self.errorMsg = QtGui.QLabel(u"",self)
         self.errorMsg.setStyleSheet("color: red; font-weight: bold;")
 
+        self.previewBtn = QtGui.QPushButton(u"Preview")
+        self.previewBtn.clicked.connect(self.preview_certificate)
         self.generateBtn = QtGui.QPushButton(u"Gerar!")
         self.generateBtn.clicked.connect(self.generate)
         self.generateSendBtn = QtGui.QPushButton(u"Gerar e enviar por email!")
         self.generateSendBtn.clicked.connect(self.generate_send)
+
+        self.generateBtnsLayout.addWidget(self.previewBtn)
         self.generateBtnsLayout.addWidget(self.generateBtn)
         self.generateBtnsLayout.addWidget(self.generateSendBtn)
 
@@ -152,6 +156,16 @@ class CertificatesWidget(QtGui.QWidget):
             str(self.signatures[self.responsibleList.currentIndex()][0]))
             self.responsible = cursor.fetchone()
 
+    def preview_certificate(self):
+        self.generate_general()
+
+        self.preview_progress = GenerateCertificateProgress(self.save_folder,
+                                                            self.cert_data,
+                                                            (),
+                                                            (),
+                                                            True
+                                                           )
+
     def generate(self):
         self.generate_general()
 
@@ -218,15 +232,16 @@ class AddClientDialog(QtGui.QDialog):
 
 class GenerateCertificateProgress(QtGui.QDialog):
 
-    def __init__(self, save_folder, cert_data, clients, responsible):
+    def __init__(self, save_folder, cert_data, clients, responsible, preview=False):
         super(GenerateCertificateProgress, self).__init__()
         self.setWindowTitle(u"Gerando certificados")
         self.setGeometry(450,300,400,200)
+        self.preview = preview
 
         self.n = 0
         self.total = len(clients)+1
 
-        self.generate_thread = GenerateThread()
+        self.generate_thread = GenerateThread(self.preview)
         self.generate_thread._get_info(save_folder, cert_data,
         clients, responsible)
         self.connect(self.generate_thread, QtCore.SIGNAL("finished()"), self.done)
@@ -267,19 +282,25 @@ class GenerateCertificateProgress(QtGui.QDialog):
             self.status.setText("Finalizando...")
 
     def done(self):
+
         self.message = QtGui.QMessageBox()
+        self.message.setGeometry(450,300,300,200)
         self.message.setIcon(QtGui.QMessageBox.Information)
-        self.message.setText(u"Todos os certificados foram gerados!")
         self.message.setWindowTitle(u"Pronto!")
         self.message.setStandardButtons(QtGui.QMessageBox.Ok)
+        if not self.preview:
+            self.message.setText(u"Todos os certificados foram gerados!")
+        else:
+            self.message.setText(u"O certificado foi gerado com o nome PREVIEWDECLIENTE.pdf")
         self.message.exec_()
         self.hide()
 
 
 class GenerateThread(QtCore.QThread):
 
-    def __init__(self):
+    def __init__(self, preview=False):
         super(GenerateThread, self).__init__()
+        self.preview = preview
 
     def __del__(self):
         self.wait()
@@ -292,20 +313,28 @@ class GenerateThread(QtCore.QThread):
 
     def run(self):
         n = 1
-        for client in self.clients:
-            cursor.execute("SELECT name,register FROM clients WHERE id=?",str(client[1]))
-            client_data = cursor.fetchone()
-            self.cert_data["name"] = unicode(client_data[0]).upper()
-            self.cert_data["register"] = unicode(client_data[1])
-            generate_certificate(self.save_folder, self.cert_data)
-            self.emit(QtCore.SIGNAL("update"),1,n)
-            n+=1
+        if not self.preview:
+            for client in self.clients:
+                cursor.execute("SELECT name,register FROM clients WHERE id=?",str(client[1]))
+                client_data = cursor.fetchone()
+                self.cert_data["name"] = unicode(client_data[0]).upper()
+                self.cert_data["register"] = unicode(client_data[1])
+                self.emit(QtCore.SIGNAL("update"),1,n)
+                generate_certificate(self.save_folder, self.cert_data)
+                n+=1
 
-        self.emit(QtCore.SIGNAL("update"),2,0)
-        self.cert_data["name"] = unicode(self.responsible[1]).upper()
-        self.cert_data["register"] = unicode(self.responsible[4]).upper()
-        generate_certificate_responsible(self.save_folder, self.cert_data)
-        self.emit(QtCore.SIGNAL("update"),3,0)
+            self.emit(QtCore.SIGNAL("update"),2,0)
+            self.cert_data["name"] = unicode(self.responsible[1]).upper()
+            self.cert_data["register"] = unicode(self.responsible[4]).upper()
+            generate_certificate_responsible(self.save_folder, self.cert_data)
+            self.emit(QtCore.SIGNAL("update"),3,0)
+        else:
+            self.cert_data["name"] = u"Preview de Cliente".upper()
+            self.cert_data["register"] = u"000.000.000-00"
+            self.emit(QtCore.SIGNAL("update"),1,n)
+            generate_certificate(self.save_folder, self.cert_data)
+            self.emit(QtCore.SIGNAL("update"),3,0)
+
 
 class GenerateSendProgress(QtGui.QDialog):
 
@@ -364,6 +393,7 @@ class GenerateSendProgress(QtGui.QDialog):
 
     def done(self):
         self.message = QtGui.QMessageBox()
+        self.message.setGeometry(450,300,300,200)
         self.message.setIcon(QtGui.QMessageBox.Information)
         self.message.setText(u"Todos os certificados foram gerados e enviados!")
         self.message.setWindowTitle(u"Pronto!")
