@@ -1,15 +1,17 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
+import os
 import smtplib
 import ConfigParser
 from email.MIMEMultipart import MIMEMultipart
 from email.MIMEText import MIMEText
 from email.MIMEBase import MIMEBase
 from email import encoders
+from global_functions import app_dir
 
 class Mailer():
     def __init__(self):
         self.Config = ConfigParser.ConfigParser()
-        self.Config.read("institution.ini")
+        self.Config.read(os.path.join(app_dir,"institution.ini"))
         self.server = unicode(self.Config.get("Mail", "server"))
         self.port = int(self.Config.get("Mail", "port"))
         self.email = unicode(self.Config.get("Mail", "email"))
@@ -39,7 +41,7 @@ class Mailer():
         msg.attach(MIMEText(unicode(body),'plain', 'utf-8'))
 
         attachment = open(str(path),"rb")
-        filename = path.split('/')[-1]
+        filename = os.path.split(path)[-1]
         part = MIMEBase('application', 'octet-stream')
         part.set_payload(attachment.read())
         encoders.encode_base64(part)

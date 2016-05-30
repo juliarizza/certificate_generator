@@ -1,7 +1,12 @@
 # -*- coding: utf-8 -*-
 import sqlite3
+import os
+import sys
+from global_functions import app_dir
 
-conn = sqlite3.connect("certifica.db", check_same_thread=False)
+file_path = os.path.join(app_dir,"certifica.db")
+
+conn = sqlite3.connect(file_path, check_same_thread=False)
 cursor = conn.cursor()
 
 def createDB():

@@ -1,17 +1,18 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
+import os
 import ConfigParser
 from PyQt4 import QtGui, QtCore
 from models import conn,cursor,\
                     generate_certificate,generate_certificate_responsible,\
                     Mailer
-from global_functions import titleFont
+from global_functions import app_dir, titleFont
 
 class CertificatesWidget(QtGui.QWidget):
 
     def __init__(self):
         super(CertificatesWidget, self).__init__()
         self.Config = ConfigParser.ConfigParser()
-        self.Config.read("institution.ini")
+        self.Config.read(os.path.join(app_dir,"institution.ini"))
 
         cursor.execute("SELECT * FROM events ORDER BY id DESC")
         self.events = cursor.fetchall()

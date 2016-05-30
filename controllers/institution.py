@@ -1,9 +1,9 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 import os
 import ConfigParser
 from shutil import copyfile
 from PyQt4 import QtGui, QtCore
-from global_functions import titleFont, validar_cnpj
+from global_functions import app_dir, titleFont, validar_cnpj
 from models import conn,cursor
 
 class InstitutionDataWidget(QtGui.QWidget):
@@ -49,7 +49,7 @@ class InstitutionDataWidget(QtGui.QWidget):
         self.errorMsg.setStyleSheet("color: red; font-weight: bold;")
 
         try:
-            self.Config.read("institution.ini")
+            self.Config.read(app_dir+"institution.ini")
             self.instNameLineEdit.setText(unicode(self.Config.get("Main", "name")))
             self.instIDLineEdit.setText(unicode(self.Config.get("Main", "id")))
             self.instLogoName.setText(unicode(self.Config.get("Main", "logo")))
@@ -71,16 +71,16 @@ class InstitutionDataWidget(QtGui.QWidget):
     def upload_logo(self):
         filename = QtGui.QFileDialog.getOpenFileName(self, u"Escolher",
                                                     u"Image files (*.jpg *.png *.gif)")
-        only_file = filename.split("/")[-1]
+        only_file = os.path.split(filename)[-1]
         self.instLogoName.setText(only_file)
 
-        img_files = os.listdir("images/")
+        img_files = os.listdir(os.path.join(app_dir,"images"))
         for fl in img_files:
             if "logo" in fl:
-                os.remove("images/"+fl)
+                os.remove(os.path.join(app_dir,"images",fl))
 
         ext = filename.split(".")[-1]
-        new_filename = "images/logo.%s" % ext
+        new_filename = os.path.join(app_dir,"images","logo.{0}".format(ext))
 
         copyfile(filename, new_filename)
 
@@ -90,7 +90,7 @@ class InstitutionDataWidget(QtGui.QWidget):
         elif validar_cnpj(unicode(self.instIDLineEdit.text())) == False:
             self.errorMsg.setText(u"O CNPJ é inválido!")
         else:
-            cfgfile = open("institution.ini", "wb")
+            cfgfile = open(app_dir+"institution.ini", "wb")
             try:
                 self.Config.add_section("Main")
                 self.Config.add_section("Contact")
@@ -176,7 +176,7 @@ class ConfigMailWidget(QtGui.QWidget):
         elif unicode(self.mailPswdLineEdit.text()) == "":
             self.errorMsg.setText(u"A senha precisa estar preenchida!")
         else:
-            cfgfile = open("institution.ini", "wb")
+            cfgfile = open(app_dir+"institution.ini", "wb")
             try:
                 self.Config.add_section("Mail")
                 # create new sections
@@ -259,7 +259,7 @@ class SignaturesListWidget(QtGui.QWidget):
                                                       QtGui.QMessageBox.Yes |
                                                       QtGui.QMessageBox.No)
             if choice == QtGui.QMessageBox.Yes:
-                os.remove("signatures/{0}.png".format(str(sig_id)))
+                os.remove(os.path.join(app_dir,"signatures","{0}.png".format(str(sig_id))))
                 cursor.execute("DELETE FROM signatures WHERE id=?", str(sig_id))
                 conn.commit()
             else:
@@ -378,7 +378,7 @@ class SignaturesDialog(QtGui.QDialog):
                                ))
 
                 if self.filename:
-                    new_filename = "signatures/"+str(self.sig_id)+".png"
+                    new_filename = os.path.join(app_dir,"signatures","{0}.png".format(str(self.sig_id)))
                     copyfile(self.filename, new_filename)
 
                 conn.commit()
@@ -408,7 +408,7 @@ class SignaturesDialog(QtGui.QDialog):
                     self.sig_id = cursor.lastrowid
 
                     if self.filename:
-                        new_filename = "signatures/"+str(self.sig_id)+".png"
+                        new_filename = os.path.join(app_dir,"signatures","{0}.png".format(str(self.sig_id)))
                         copyfile(self.filename, new_filename)
 
                     conn.commit()

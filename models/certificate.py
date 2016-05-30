@@ -1,13 +1,13 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 import os
 import pdfkit
 import codecs
 from datetime import date
 from PyPDF2 import PdfFileReader, PdfFileMerger
+from global_functions import app_dir
 
 def generate_certificate(path,cert_data):
-    new_filename = path+"/"
-    new_filename += ''.join(i for i in unicode(cert_data["name"]) if ord(i)<128).upper()
+    new_filename = os.path.join(path,''.join(i for i in unicode(cert_data["name"]) if ord(i)<128).upper())
     new_filename.replace(" ","")
     new_filename = unicode(new_filename)
 
@@ -22,7 +22,7 @@ def generate_certificate(path,cert_data):
                "background":"",
                "images":""}
 
-    for filename in os.listdir('images/'):
+    for filename in os.listdir(os.path.join(app_dir,"images")):
         if "logo" in filename:
             cert_data["logo"] = filename
             break
@@ -73,7 +73,7 @@ def generate_certificate(path,cert_data):
 
 def generate_certificate_responsible(path, cert_data):
     generate_certificate(path,cert_data)
-    new_filename = unicode(path+"/responsible.pdf")
+    new_filename = unicode(os.path.join(path,"responsible.pdf"))
 
     options = {"page-size":"A4",
                "orientation":"Landscape",
@@ -86,7 +86,7 @@ def generate_certificate_responsible(path, cert_data):
                "background":"",
                "images":""}
 
-    for filename in os.listdir('images/'):
+    for filename in os.listdir(os.path.join(app_dir,"images")):
         if "logo" in filename:
             cert_data["logo"] = filename
             break
