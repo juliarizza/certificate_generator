@@ -40,8 +40,8 @@ class Mailer():
                   )
         msg.attach(MIMEText(unicode(body),'plain', 'utf-8'))
 
-        attachment = open(str(path),"rb")
-        filename = os.path.split(path)[-1]
+        attachment = open(unicode(path),"rb")
+        filename = os.path.basename(unicode(path))
         part = MIMEBase('application', 'octet-stream')
         part.set_payload(attachment.read())
         encoders.encode_base64(part)

@@ -71,7 +71,7 @@ class InstitutionDataWidget(QtGui.QWidget):
     def upload_logo(self):
         filename = QtGui.QFileDialog.getOpenFileName(self, u"Escolher",
                                                     u"Image files (*.jpg *.png *.gif)")
-        only_file = os.path.split(filename)[-1]
+        only_file = os.path.basename(unicode(filename))
         self.instLogoName.setText(only_file)
 
         img_files = os.listdir(os.path.join(app_dir,"images"))
@@ -348,7 +348,7 @@ class SignaturesDialog(QtGui.QDialog):
         self.filename = QtGui.QFileDialog.getOpenFileName(self, u"Escolher",
                                                                 u"Image files (*.png)")
 
-        only_file = self.filename.split("/")[-1]
+        only_file = os.path.basename(unicode(self.filename))
         self.sigUploadName.setText(only_file)
 
     def save_data(self):

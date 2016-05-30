@@ -7,8 +7,10 @@ from PyPDF2 import PdfFileReader, PdfFileMerger
 from global_functions import app_dir
 
 def generate_certificate(path,cert_data):
-    new_filename = os.path.join(path,''.join(i for i in unicode(cert_data["name"]) if ord(i)<128).upper())
-    new_filename.replace(" ","")
+    new_filename = os.path.join(unicode(path),u''.join(i for i in unicode(cert_data["name"])\
+                                                                  if ord(i)<128)\
+                                                                  .upper()\
+                                                                  .replace(" ",""))
     new_filename = unicode(new_filename)
 
     options = {"page-size":"A4",
@@ -73,7 +75,7 @@ def generate_certificate(path,cert_data):
 
 def generate_certificate_responsible(path, cert_data):
     generate_certificate(path,cert_data)
-    new_filename = unicode(os.path.join(path,"responsible.pdf"))
+    new_filename = unicode(os.path.join(unicode(path),"responsible.pdf"))
 
     options = {"page-size":"A4",
                "orientation":"Landscape",

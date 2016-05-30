@@ -180,7 +180,7 @@ class CertificatesWidget(QtGui.QWidget):
     def generate_send(self):
         self.generate_general()
 
-        cursor.execute("SELECT name,email FROM signatures WHERE id=?",
+        cursor.execute("SELECT * FROM signatures WHERE id=?",
                        str(self.signatures[self.responsibleList.currentIndex()][0]))
         responsible = cursor.fetchone()
 
@@ -426,17 +426,27 @@ class GenerateSendThread(QtCore.QThread):
             cursor.execute("SELECT name,email FROM clients WHERE id=?",str(client[1]))
             client_data = cursor.fetchone()
 
-            filepath = self.save_folder+"/"
-            filepath += ''.join(i for i in unicode(client_data[0]) if ord(i)<128).upper()
+            filepath = os.path.join(unicode(self.save_folder),u''.join(i for i in \
+                                                                unicode(client_data[0]) \
+                                                                if ord(i)<128)\
+                                                                .upper()\
+                                                                .replace(" ",""))
             filepath += ".pdf"
-            filepath.replace(" ","")
+
+            self.cert_data["name"] = unicode(client_data[0]).upper()
+            self.cert_data["register"] = unicode(client_data[1])
+
             self.emit(QtCore.SIGNAL("update"),2,n)
+            generate_certificate(self.save_folder, self.cert_data)
             self.mailer.send_certificate(filepath,unicode(client_data[1]))
             n+=1
 
+        filepath = os.path.join(unicode(self.save_folder),u"responsible.pdf")
+        self.cert_data["name"] = unicode(self.responsible[1]).upper()
+        self.cert_data["register"] = unicode(self.responsible[4]).upper()
         self.emit(QtCore.SIGNAL("update"),3,0)
-        filepath = self.save_folder+"/responsible.pdf"
-        self.mailer.send_certificate(filepath,unicode(self.responsible[1]))
+        generate_certificate_responsible(self.save_folder, self.cert_data)
+        self.mailer.send_certificate(unicode(filepath),unicode(self.responsible[3]))
 
         self.emit(QtCore.SIGNAL("update"),4,0)
         self.mailer.quit()
