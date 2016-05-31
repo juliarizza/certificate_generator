@@ -2,23 +2,27 @@
 import os
 import sys
 import re
+
 from PyQt4 import QtGui
 
+# If the platform is windows, we have to create the app folder in
+# somewhere else than the place where it is installed
 if "win" in sys.platform:
-    app_dir =  "{0}\\Certifica\\".format(os.environ['APPDATA'])
+    app_dir = "{0}\\Certifica\\".format(os.environ['APPDATA'])
     if not os.path.exists(app_dir):
         os.makedirs(app_dir)
-	os.makedirs(os.path.join(app_dir,"images"))
-	os.makedirs(os.path.join(app_dir,"signatures"))
+    os.makedirs(os.path.join(app_dir, "images"))
+    os.makedirs(os.path.join(app_dir, "signatures"))
 else:
     app_dir = os.path.dirname(os.path.abspath(__file__))+"/"
 
+# Font for titles
 titleFont = QtGui.QFont()
 titleFont.setBold(True)
 titleFont.setPixelSize(20)
 
 
-## CODE FROM: http://wiki.python.org.br/VerificadorDeCpfCnpjSimples ##
+# CODE FROM: http://wiki.python.org.br/VerificadorDeCpfCnpjSimples
 def validar_cpf(cpf):
     """
     Valida CPFs, retornando apenas a string de números válida.
@@ -65,6 +69,7 @@ def validar_cpf(cpf):
     if novo == inteiros:
         return cpf
     return False
+
 
 def validar_cnpj(cnpj):
     """

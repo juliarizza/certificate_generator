@@ -1,15 +1,23 @@
 # -*- coding: utf-8 -*-
-import sqlite3
 import os
 import sys
+import sqlite3
+
 from global_functions import app_dir
 
-file_path = os.path.join(app_dir,"certifica.db")
+# Database path
+file_path = os.path.join(app_dir, "certifica.db")
 
+# Connects to the database
 conn = sqlite3.connect(file_path, check_same_thread=False)
 cursor = conn.cursor()
 
+
 def createDB():
+    """
+        Creates all tables in the database.
+    """
+
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS signatures(
         id INTEGER PRIMARY KEY NOT NULL,
