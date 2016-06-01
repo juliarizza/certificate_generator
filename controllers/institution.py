@@ -116,8 +116,8 @@ class InstitutionDataWidget(QtGui.QWidget):
         """
         # Grabs the file
         filename = QtGui.QFileDialog.getOpenFileName(
-            self, u"Escolher",
-            u"Image files (*.jpg *.png *.gif)"
+            self, u"Escolher", "",
+            u"Image files (*.png *.jpg *.gif)"
         )
 
         # Split to get only the filename
@@ -551,7 +551,7 @@ class SignaturesDialog(QtGui.QDialog):
         """
         # Asks for the signature image file
         self.filename = QtGui.QFileDialog.getOpenFileName(
-            self, u"Escolher",
+            self, u"Escolher","",
             u"Image files (*.png)"
         )
 

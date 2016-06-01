@@ -230,9 +230,11 @@ class CertificatesWidget(QtGui.QWidget):
 
             # Current responsible
             responsible_id = unicode(self.signatures[current_responsible][0])
+            responsible_sig = os.path.join(app_dir, "signatures", "{0}.png".format(responsible_id))
 
             # Current institution
             institution_id = unicode(self.signatures[current_institution][0])
+            institution_sig = os.path.join(app_dir, "signatures", "{0}.png".format(institution_id))
             institution_role = unicode(self.signatures[current_institution][2])
             institution_name = unicode(self.Config.get("Main", "Name")).upper()
             institution_register = unicode(self.Config.get("Main", "ID"))
@@ -244,8 +246,8 @@ class CertificatesWidget(QtGui.QWidget):
                 "end_date": event_end_date,
                 "hours": event_hours,
                 "content": event_content,
-                "responsible_sig": responsible_id,
-                "institution_sig": institution_id,
+                "responsible_sig": responsible_sig,
+                "institution_sig": institution_sig,
                 "role": institution_role,
                 "institution": institution_name,
                 "inst_register": institution_register

@@ -1,4 +1,4 @@
-# Certifica!
+﻿# Certifica!
 > Gerador de certificados para cursos livres & eventos feito em Python
 
 > *Free courses & events certificate generator made with Python*
@@ -26,10 +26,13 @@ Instale as dependências
 
 *PyQt4 é uma dependência externa, verifique a instalação para seu sistema operacional*
 
+*Adicione o .exe do wkhtmltopdf para suas variáveis de ambiente se estiver utilizando Windows*
+
 ```
 cd certificate_generator
 pip install -r requirements.txt
-apt-get install python-qt4
+sudo apt-get install python-qt4
+sudo apt-get install wkhtmltopdf
 ```
 
 Execute

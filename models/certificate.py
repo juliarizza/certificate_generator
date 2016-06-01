@@ -48,7 +48,7 @@ def generate_certificate(path, cert_data, responsible=False):
         if "logo" in filename:
             # If a logo exists, pass it as data
             # so the certificate will have in the corner
-            cert_data["logo"] = filename
+            cert_data["logo"] = os.path.join(app_dir, "images", filename)
             break
     else:
         cert_data["logo"] = ""
