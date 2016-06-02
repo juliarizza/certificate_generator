@@ -152,6 +152,10 @@ class InstitutionDataWidget(QtGui.QWidget):
             self.errorMsg.setText(u"O nome precisa estar preenchido!")
         elif validar_cnpj(unicode(self.instIDLineEdit.text())) is False:
             self.errorMsg.setText(u"O CNPJ é inválido!")
+        elif unicode(self.instLogoName.text()) == \
+                u"Faça o upload de uma imagem":
+            self.errorMsg.setText(u"É necessário fazer upload "
+                                  u"da assinatura em .png!")
         else:
             # Open the .ini file
             cfgfile = open(app_dir+"institution.ini", "wb")
@@ -189,6 +193,8 @@ class InstitutionDataWidget(QtGui.QWidget):
             # Write changes to the .ini file
             self.Config.write(cfgfile)
             cfgfile.close()
+
+            self.errorMsg.setText(u"Salvo!")
 
 
 class ConfigMailWidget(QtGui.QWidget):
@@ -319,6 +325,8 @@ class ConfigMailWidget(QtGui.QWidget):
             # Write the data
             self.Config.write(cfgfile)
             cfgfile.close()
+
+            self.errorMsg.setText(u"Salvo!")
 
 
 class SignaturesListWidget(QtGui.QWidget):
@@ -579,8 +587,8 @@ class SignaturesDialog(QtGui.QDialog):
             self.errorMsg.setText(u"O email precisa estar preenchido!")
         elif unicode(self.sigUploadName.text()) == \
                 u"Faça o upload da assinatura":
-            self.errorMsg.setText(u"É necessário fazer upload \
-                                  da assinatura em .png!")
+            self.errorMsg.setText(u"É necessário fazer upload "
+                                  u"da assinatura em .png!")
         else:
             # Verifies if creating or updating the signature
             if self.sig_id:
