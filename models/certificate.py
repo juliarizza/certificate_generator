@@ -124,8 +124,8 @@ def generate_certificate(path, cert_data, responsible=False):
 
         # Generate back of the certificate
         pdfkit.from_file("temp_back.html",
-        new_filename+"_back.pdf",
-        options=options)
+                         new_filename+"_back.pdf",
+                         options=options)
 
     # Generate the front pdf page and
     # merge front and back pdf pages into one pdf

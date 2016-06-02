@@ -21,7 +21,7 @@ class Window(QtGui.QMainWindow):
         self.setWindowTitle("Certifica!")
         self.central_widget = QtGui.QStackedWidget()
         self.setCentralWidget(self.central_widget)
-        self.setWindowIcon(QtGui.QIcon('images/favicon.png'))
+        self.setWindowIcon(QtGui.QIcon('images/favicon.ico'))
 
         # Institution menu #
         dataAction = QtGui.QAction("&Dados", self)

@@ -7,6 +7,7 @@ setup(
         "packages":["PyPDF2","pdfkit","email"],
         "include_files": ["images/background.png",
                           "images/favicon.png",
+                          "images/favicon.ico",
                           "certificate_back.html",
                           "certificate_front.html",
                           "certificate_resp.html"
