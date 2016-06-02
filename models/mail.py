@@ -34,7 +34,11 @@ class Mailer():
         self.smtp_server = smtplib.SMTP(self.server, self.port)
         self.smtp_server.ehlo()
         self.smtp_server.starttls()
-        self.smtp_server.login(self.email, self.password)
+        try:
+            self.smtp_server.login(self.email, self.password)
+            return 1
+        except:
+            return 0
 
     def send_certificate(self, path, send_to):
         """

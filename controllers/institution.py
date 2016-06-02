@@ -633,9 +633,9 @@ class SignaturesDialog(QtGui.QDialog):
                     error = QtGui.QMessageBox()
                     error.setIcon(QtGui.QMessageBox.Critical)
                     error.setText(u"A assinatura já está cadastrada!")
-                    error.setInformativeText(u"Já existe uma assinatura \
-                                            com este CPF cadastrada \
-                                            no programa.")
+                    error.setInformativeText(u"Já existe uma assinatura "
+                                             u"com este CPF cadastrada "
+                                             u"no programa.")
                     error.setWindowTitle(u"Assinatura já cadastrada!")
                     error.setStandardButtons(QtGui.QMessageBox.Ok)
                     error.exec_()

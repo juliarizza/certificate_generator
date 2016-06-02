@@ -22,6 +22,8 @@ class CertificatesWidget(QtGui.QWidget):
             Setup widgets and select data from database.
         """
         super(CertificatesWidget, self).__init__()
+        # Window settings
+        self.save_folder = ""
 
         # Connects with configuration file to get info
         self.Config = ConfigParser.ConfigParser()
@@ -215,11 +217,20 @@ class CertificatesWidget(QtGui.QWidget):
                 u"Salvar em"
             )
 
+            self.cert_data = {}
+
             # Collect all data that needs to be passed
             # Selected items
             current_event = self.eventsList.currentIndex()
             current_responsible = self.responsibleList.currentIndex()
             current_institution = self.institutionList.currentIndex()
+
+            if current_event == -1:
+                self.errorMsg.setText(u"Primeiro cadastre um evento!")
+                return 0
+            elif current_responsible == -1 or current_institution == -1:
+                self.errorMsg.setText(u"Primeiro cadastre assinaturas!")
+                return 0
 
             # Current event
             event_title = unicode(self.events[current_event][1]).upper()
@@ -259,16 +270,18 @@ class CertificatesWidget(QtGui.QWidget):
             )
             self.responsible = cursor.fetchone()
 
+            return 1
+
     def preview_certificate(self):
         """
             Open a dialog for showing the progress of the
             preview certificate generation.
         """
 
-        self.generate_general(preview=True)
+        r = self.generate_general(preview=True)
 
         # Verifies if user selected a folder or cancelled
-        if self.save_folder != u"":
+        if self.save_folder != u"" and r == 1:
             self.preview_progress = GenerateCertificateProgress(
                 self.save_folder,
                 self.cert_data,
@@ -283,10 +296,10 @@ class CertificatesWidget(QtGui.QWidget):
             Open a dialog for showing the progress of the
             subscriptions and responsible certificate generation.
         """
-        self.generate_general()
+        r = self.generate_general()
 
         # Verifies if user selected a folder or cancelled
-        if self.save_folder != u"":
+        if self.save_folder != u"" and r == 1:
             self.generate_progress = GenerateCertificateProgress(
                 self.save_folder,
                 self.cert_data,
@@ -302,10 +315,10 @@ class CertificatesWidget(QtGui.QWidget):
             generation and mailing.
         """
 
-        self.generate_general()
+        r = self.generate_general()
 
         # Verifies if user selected a folder or cancelled
-        if self.save_folder != u"":
+        if self.save_folder != u"" and r == 1:
             self.generate_send_progress = GenerateSendProgress(
                 self.save_folder,
                 self.cert_data,
@@ -585,6 +598,7 @@ class GenerateSendProgress(QtGui.QDialog):
         self.setGeometry(450, 300, 400, 200)
         self.n = 0
         self.total = len(clients)+3
+        self.error = False
 
         # Create thread for dealing with
         # the generation and mailing
@@ -602,6 +616,11 @@ class GenerateSendProgress(QtGui.QDialog):
             self.generate_send_thread,
             QtCore.SIGNAL("update"),
             self.update
+        )
+        self.connect(
+            self.generate_send_thread,
+            QtCore.SIGNAL("error_raised()"),
+            self.error_raised
         )
 
         # Defines all layouts
@@ -656,22 +675,42 @@ class GenerateSendProgress(QtGui.QDialog):
             self.progress_bar.setValue(100)
             self.status.setText(u"Finalizando")
 
+    def error_raised(self):
+        """
+            Updates error status to True.
+        """
+        self.error = True
+
     def done(self):
         """
             Shows up message box with information about the completed thread.
         """
 
-        # Creates the message box
-        self.message = QtGui.QMessageBox()
-        self.message.setGeometry(450, 300, 300, 200)
-        self.message.setIcon(QtGui.QMessageBox.Information)
-        self.message.setText(u"Todos os certificados "
-                             u"foram gerados e enviados!")
-        self.message.setWindowTitle(u"Pronto!")
-        self.message.setStandardButtons(QtGui.QMessageBox.Ok)
+        # Verifies if the connection was OK
+        if self.error is False:
+            # Creates the message box
+            self.message = QtGui.QMessageBox()
+            self.message.setGeometry(450, 300, 300, 200)
+            self.message.setIcon(QtGui.QMessageBox.Information)
+            self.message.setText(u"Todos os certificados "
+                                 u"foram gerados e enviados!")
+            self.message.setWindowTitle(u"Pronto!")
+            self.message.setStandardButtons(QtGui.QMessageBox.Ok)
 
-        # Shows up message box
-        self.message.exec_()
+            # Shows up message box
+            self.message.exec_()
+        else:
+            # Display a message box for more error info
+            self.error = QtGui.QMessageBox()
+            self.error.setGeometry(450, 300, 300, 200)
+            self.error.setIcon(QtGui.QMessageBox.Critical)
+            self.error.setWindowTitle(u"Erro de autenticação!")
+            self.error.setText(u"Erro de autenticação!")
+            self.error.setInformativeText(u"Houve uma falha na autenticação! "
+                                          u"Verifique as informações de "
+                                          u"conexão na aba Instituição.")
+            self.error.setStandardButtons(QtGui.QMessageBox.Ok)
+            self.error.exec_()
 
         # Hide the dialog
         self.hide()
@@ -708,48 +747,52 @@ class GenerateSendThread(QtCore.QThread):
         # connects to the mailer and updates progress bar
         self.emit(QtCore.SIGNAL("update"), 1, 0)
         self.mailer = Mailer()
-        self.mailer.connect()
+        r = self.mailer.connect()
 
-        n = 1
-        for client in self.clients:
-            # Get client info
-            cursor.execute(
-                "SELECT name,email FROM clients WHERE id=?",
-                str(client[1])
-            )
-            client_data = cursor.fetchone()
+        # Verifies authentication
+        if r == 1:
+            n = 1
+            for client in self.clients:
+                # Get client info
+                cursor.execute(
+                    "SELECT name,email FROM clients WHERE id=?",
+                    str(client[1])
+                )
+                client_data = cursor.fetchone()
 
-            filepath = os.path.join(
-                unicode(self.save_folder),
-                u''.join(i for i in unicode(client_data[0]) if ord(i) < 128)
-                .upper()
-                .replace(" ", "")
-            )
-            filepath += ".pdf"
+                filepath = os.path.join(
+                    unicode(self.save_folder),
+                    u''.join(i for i in unicode(client_data[0]) if ord(i) < 128)
+                    .upper()
+                    .replace(" ", "")
+                )
+                filepath += ".pdf"
 
-            self.cert_data["name"] = unicode(client_data[0]).upper()
-            self.cert_data["register"] = unicode(client_data[1])
+                self.cert_data["name"] = unicode(client_data[0]).upper()
+                self.cert_data["register"] = unicode(client_data[1])
+
+                # Updates progress bar and generate and send certificate
+                self.emit(QtCore.SIGNAL("update"), 2, n)
+                generate_certificate(self.save_folder, self.cert_data)
+                self.mailer.send_certificate(filepath, unicode(client_data[1]))
+                n += 1
+
+            # Gets responsible info
+            filepath = os.path.join(unicode(self.save_folder), u"responsible.pdf")
+            self.cert_data["name"] = unicode(self.responsible[1]).upper()
+            self.cert_data["register"] = unicode(self.responsible[4]).upper()
 
             # Updates progress bar and generate and send certificate
-            self.emit(QtCore.SIGNAL("update"), 2, n)
-            generate_certificate(self.save_folder, self.cert_data)
-            self.mailer.send_certificate(filepath, unicode(client_data[1]))
-            n += 1
+            self.emit(QtCore.SIGNAL("update"), 3, 0)
+            generate_certificate(self.save_folder, self.cert_data, True)
+            self.mailer.send_certificate(
+                unicode(filepath),
+                unicode(self.responsible[3])
+            )
 
-        # Gets responsible info
-        filepath = os.path.join(unicode(self.save_folder), u"responsible.pdf")
-        self.cert_data["name"] = unicode(self.responsible[1]).upper()
-        self.cert_data["register"] = unicode(self.responsible[4]).upper()
+            self.emit(QtCore.SIGNAL("update"), 4, 0)
 
-        # Updates progress bar and generate and send certificate
-        self.emit(QtCore.SIGNAL("update"), 3, 0)
-        generate_certificate(self.save_folder, self.cert_data, True)
-        self.mailer.send_certificate(
-            unicode(filepath),
-            unicode(self.responsible[3])
-        )
-
-        self.emit(QtCore.SIGNAL("update"), 4, 0)
-
-        # Quits mailer
-        self.mailer.quit()
+            # Quits mailer
+            self.mailer.quit()
+        else:
+            self.emit(QtCore.SIGNAL("error_raised()"))
