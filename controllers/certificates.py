@@ -267,13 +267,16 @@ class CertificatesWidget(QtGui.QWidget):
 
         self.generate_general(preview=True)
 
-        self.preview_progress = GenerateCertificateProgress(
-            self.save_folder,
-            self.cert_data,
-            (),
-            (),
-            True
-        )
+        # Verifies if user selected a folder or cancelled
+        if self.save_folder != u"":
+            self.preview_progress = GenerateCertificateProgress(
+                self.save_folder,
+                self.cert_data,
+                (),
+                (),
+                True
+            )
+            self.preview_progress.show()
 
     def generate(self):
         """
@@ -282,13 +285,15 @@ class CertificatesWidget(QtGui.QWidget):
         """
         self.generate_general()
 
-        self.generate_progress = GenerateCertificateProgress(
-            self.save_folder,
-            self.cert_data,
-            self.clients,
-            self.responsible
-        )
-        self.generate_progress.show()
+        # Verifies if user selected a folder or cancelled
+        if self.save_folder != u"":
+            self.generate_progress = GenerateCertificateProgress(
+                self.save_folder,
+                self.cert_data,
+                self.clients,
+                self.responsible
+            )
+            self.generate_progress.show()
 
     def generate_send(self):
         """
@@ -299,13 +304,15 @@ class CertificatesWidget(QtGui.QWidget):
 
         self.generate_general()
 
-        self.generate_send_progress = GenerateSendProgress(
-            self.save_folder,
-            self.cert_data,
-            self.clients,
-            self.responsible
-        )
-        self.generate_send_progress.show()
+        # Verifies if user selected a folder or cancelled
+        if self.save_folder != u"":
+            self.generate_send_progress = GenerateSendProgress(
+                self.save_folder,
+                self.cert_data,
+                self.clients,
+                self.responsible
+            )
+            self.generate_send_progress.show()
 
 
 class AddClientDialog(QtGui.QDialog):
@@ -452,8 +459,13 @@ class GenerateCertificateProgress(QtGui.QDialog):
 
         # Update status according to the signal
         if step == 1:
+            if self.preview:
+                certs = 1
+            else:
+                certs = self.total-1
+
             self.status.setText(
-                u"Gerando certificado {0}/{1}".format(n, self.total-2)
+                u"Gerando certificado {0}/{1}".format(n, certs)
             )
         elif step == 2:
             self.status.setText(u"Gerando certificado do responsável")
@@ -476,8 +488,8 @@ class GenerateCertificateProgress(QtGui.QDialog):
         if not self.preview:
             self.message.setText(u"Todos os certificados foram gerados!")
         else:
-            self.message.setText(u"O certificado foi gerado com \
-                o nome PREVIEWDECLIENTE.pdf")
+            self.message.setText(u"O certificado foi gerado com "
+                                 u"o nome PREVIEWDECLIENTE.pdf")
 
         # Shows up the message box
         self.message.exec_()
@@ -634,12 +646,12 @@ class GenerateSendProgress(QtGui.QDialog):
             self.status.setText(u"Conectando...")
         if step == 2:
             self.status.setText(
-                u"Gerando & enviando \
-                certificado {0}/{1}".format(n, (self.total-3))
+                u"Gerando & enviando "
+                "certificado {0}/{1}".format(n, (self.total-3))
             )
         if step == 3:
-            self.status.setText(u"Gerando & enviando \
-                                certificado do responsável")
+            self.status.setText(u"Gerando & enviando "
+                                u"certificado do responsável")
         if step == 4:
             self.progress_bar.setValue(100)
             self.status.setText(u"Finalizando")
@@ -653,8 +665,8 @@ class GenerateSendProgress(QtGui.QDialog):
         self.message = QtGui.QMessageBox()
         self.message.setGeometry(450, 300, 300, 200)
         self.message.setIcon(QtGui.QMessageBox.Information)
-        self.message.setText(u"Todos os certificados \
-                             foram gerados e enviados!")
+        self.message.setText(u"Todos os certificados "
+                             u"foram gerados e enviados!")
         self.message.setWindowTitle(u"Pronto!")
         self.message.setStandardButtons(QtGui.QMessageBox.Ok)
 

@@ -120,24 +120,28 @@ class InstitutionDataWidget(QtGui.QWidget):
             u"Image files (*.jpg *.png *.gif)"
         )
 
-        # Split to get only the filename
-        only_file = os.path.basename(unicode(filename))
-        # Shows the filename in the form, as uploaded
-        self.instLogoName.setText(only_file)
+        # Verifies if the user chose a path or cancelled
+        if filename != u"":
+            # Split to get only the filename
+            only_file = os.path.basename(unicode(filename))
+            # Shows the filename in the form, as uploaded
+            self.instLogoName.setText(only_file)
 
-        # Verifies if there is another logo in the images file
-        img_files = os.listdir(os.path.join(app_dir, "images"))
-        for fl in img_files:
-            if "logo" in fl:
-                # If another logo exists, remove it
-                os.remove(os.path.join(app_dir, "images", fl))
+            # Verifies if there is another logo in the images file
+            img_files = os.listdir(os.path.join(app_dir, "images"))
+            for fl in img_files:
+                if "logo" in fl:
+                    # If another logo exists, remove it
+                    os.remove(os.path.join(app_dir, "images", fl))
 
-        # Change the filename of the new logo to "logo.extension"
-        ext = filename.split(".")[-1]
-        new_filename = os.path.join(app_dir, "images", "logo.{0}".format(ext))
+            # Change the filename of the new logo to "logo.extension"
+            ext = filename.split(".")[-1]
+            new_filename = os.path.join(app_dir,
+                                        "images",
+                                        "logo.{0}".format(ext))
 
-        # Copy the logo file to the images folder
-        copyfile(filename, new_filename)
+            # Copy the logo file to the images folder
+            copyfile(filename, new_filename)
 
     def save_data(self):
         """
@@ -555,9 +559,11 @@ class SignaturesDialog(QtGui.QDialog):
             u"Image files (*.png)"
         )
 
-        # Gets only the filename
-        only_file = os.path.basename(unicode(self.filename))
-        self.sigUploadName.setText(only_file)
+        # Verifies if the user chose a path or cancelled
+        if self.filename != u"":
+            # Gets only the filename
+            only_file = os.path.basename(unicode(self.filename))
+            self.sigUploadName.setText(only_file)
 
     def save_data(self):
         """
