@@ -11,8 +11,8 @@ if "win" in sys.platform:
     app_dir = "{0}\\Certifica\\".format(os.environ['APPDATA'])
     if not os.path.exists(app_dir):
         os.makedirs(app_dir)
-    os.makedirs(os.path.join(app_dir, "images"))
-    os.makedirs(os.path.join(app_dir, "signatures"))
+        os.makedirs(os.path.join(app_dir, "images"))
+        os.makedirs(os.path.join(app_dir, "signatures"))
 else:
     app_dir = os.path.dirname(os.path.abspath(__file__))+"/"
 
