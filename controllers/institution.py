@@ -155,7 +155,7 @@ class InstitutionDataWidget(QtGui.QWidget):
         elif unicode(self.instLogoName.text()) == \
                 u"Faça o upload de uma imagem":
             self.errorMsg.setText(u"É necessário fazer upload "
-                                  u"da assinatura em .png!")
+                                  u"da logo para o certificado!")
         else:
             # Open the .ini file
             cfgfile = open(app_dir+"institution.ini", "wb")

@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-a
+﻿# -*- coding: utf-8 -*-a
 import sys
 from PyQt4 import QtGui, QtCore
 
@@ -87,6 +87,8 @@ class Window(QtGui.QMainWindow):
         helpMenu = mainMenu.addMenu("&Ajuda")
         helpMenu.addAction(licenseAction)
         helpMenu.addAction(aboutAction)
+
+        self.list_certificates()
 
     def show_institution_data(self):
         """
