@@ -4,7 +4,6 @@ import codecs
 from datetime import date
 
 import pdfkit
-from PyPDF2 import PdfFileReader, PdfFileMerger
 
 from global_functions import app_dir
 
@@ -29,7 +28,7 @@ def generate_certificate(path, cert_data, responsible=False):
             "responsible"
         )
 
-    new_filename = unicode(new_filename)
+    new_filename = unicode(new_filename+".pdf")
 
     # Pdfkit options
     options = {"page-size": "A4",
@@ -40,8 +39,7 @@ def generate_certificate(path, cert_data, responsible=False):
                "margin-bottom": "0",
                "encoding": "UTF-8",
                "quiet": "",
-               "background": "",
-               "images": ""}
+              }
 
     # Verifies if there is an existing logo
     for filename in os.listdir(os.path.join(app_dir, "images")):
@@ -52,6 +50,12 @@ def generate_certificate(path, cert_data, responsible=False):
             break
     else:
         cert_data["logo"] = ""
+
+    # Windows paths for images so wkhtmltopdf works. I hate Windows.
+    if "C:" in cert_data["logo"] and not "file:///" in cert_data["responsible_sig"]:
+        cert_data["logo"] = "file:///"+cert_data["logo"].replace("\\","/")
+        cert_data["responsible_sig"] = "file:///"+cert_data["responsible_sig"].replace("\\","/")
+        cert_data["institution_sig"] = "file:///"+cert_data["institution_sig"].replace("\\","/")
 
     # Gets the generation date to insert into the certificate
     today = date.today()
@@ -76,6 +80,8 @@ def generate_certificate(path, cert_data, responsible=False):
         new_content += "</ul>"
         cert_data["content"] = new_content
 
+    # Describes wich pages will be generated
+    pages = []
     # Verifies if the certificate is for a responsible or a client
     if responsible is False:
         # If it is for a client, use the certificate_front.html template
@@ -94,6 +100,7 @@ def generate_certificate(path, cert_data, responsible=False):
         tmp_front = codecs.open("temp_front.html", "w", "utf-8")
         tmp_front.write(unicode(content))
         tmp_front.close()
+        pages.append("temp_front.html")
     else:
         # If it is for a responsible, use the certificate_resp.html template
 
@@ -111,6 +118,7 @@ def generate_certificate(path, cert_data, responsible=False):
         tmp_front = codecs.open("temp_resp.html", "w", "utf-8")
         tmp_front.write(unicode(content))
         tmp_front.close()
+        pages.append("temp_resp.html")
 
     if cert_data["content"] != "":
         # Do the same as the front, but now with the back of the certificate
@@ -121,40 +129,14 @@ def generate_certificate(path, cert_data, responsible=False):
         tmp_back = codecs.open("temp_back.html", "w", "utf-8")
         tmp_back.write(unicode(content))
         tmp_back.close()
+        pages.append("temp_back.html")
 
-        # Generate back of the certificate
-        pdfkit.from_file("temp_back.html",
-                         new_filename+"_back.pdf",
-                         options=options)
-
-    # Generate the front pdf page and
-    # merge front and back pdf pages into one pdf
-    merger = PdfFileMerger()
-
-    # Generate front and merge
+    # Generate front and back
     if responsible is False:
-        pdfkit.from_file("temp_front.html",
-                         new_filename+"_front.pdf",
+        pdfkit.from_file(pages,
+                         new_filename,
                          options=options)
-        merger.append(PdfFileReader(new_filename+"_front.pdf", "rb"))
     else:
-        pdfkit.from_file("temp_resp.html",
-                         new_filename+"_resp.pdf",
+        pdfkit.from_file(pages,
+                         new_filename,
                          options=options)
-        merger.append(PdfFileReader(new_filename+"_resp.pdf", "rb"))
-
-    if cert_data["content"] != "":
-        # Merge back
-        merger.append(PdfFileReader(new_filename+"_back.pdf", "rb"))
-
-    # Generate pdf
-    merger.write(new_filename+".pdf")
-
-    # Delete the pdf pages and leave just the complete pdf
-    if responsible is False:
-        os.remove(new_filename+"_front.pdf")
-    else:
-        os.remove(new_filename+"_resp.pdf")
-
-    if cert_data["content"] != "":
-        os.remove(new_filename+"_back.pdf")
