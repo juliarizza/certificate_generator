@@ -247,8 +247,12 @@ class CertificatesWidget(QtGui.QWidget):
             institution_id = unicode(self.signatures[current_institution][0])
             institution_sig = os.path.join(app_dir, "signatures", "{0}.png".format(institution_id))
             institution_role = unicode(self.signatures[current_institution][2])
-            institution_name = unicode(self.Config.get("Main", "Name")).upper()
-            institution_register = unicode(self.Config.get("Main", "ID"))
+            try:
+                institution_name = unicode(self.Config.get("Main", "Name")).upper()
+                institution_register = unicode(self.Config.get("Main", "ID"))
+            except:
+                self.errorMsg.setText(u"Cadastre os dados da aba Instituição primeiro!")
+                return 0
 
             # Fills with the data
             self.cert_data = {

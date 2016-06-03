@@ -5,7 +5,7 @@ from datetime import date
 
 import pdfkit
 
-from global_functions import app_dir
+from global_functions import app_dir, templates_dir, images_dir
 
 
 def generate_certificate(path, cert_data, responsible=False):
@@ -40,6 +40,13 @@ def generate_certificate(path, cert_data, responsible=False):
                "encoding": "UTF-8",
                "quiet": "",
               }
+
+    # Background path
+    if "win" in sys.platform:
+        cert_data["background"] = os.path.join(images_dir, "background.png")
+        cert_data["background"] = "file:///"+cert_data["background"].replace("\\", "/")
+    else:
+        cert_data["background"] = os.path.join(app_dir, "background.png")
 
     # Verifies if there is an existing logo
     for filename in os.listdir(os.path.join(app_dir, "images")):
@@ -87,49 +94,49 @@ def generate_certificate(path, cert_data, responsible=False):
         # If it is for a client, use the certificate_front.html template
 
         # Reads the certificate_front.html template
-        cert_html = codecs.open("certificate_front.html", "r", "utf-8")
+        cert_html = codecs.open(os.path.join(templates_dir,"certificate_front.html"), "r", "utf-8")
 
         # Fills the template content with the cert_data
         content = cert_html.read().format(**cert_data)
         cert_html.close()
 
         # Clear the temporary file to store this new template
-        open("temp_front.html", "w").close()
+        open(os.path.join(templates_dir, "temp_front.html"), "w").close()
 
         # Creates the temporary template with the filled cert_data
-        tmp_front = codecs.open("temp_front.html", "w", "utf-8")
+        tmp_front = codecs.open(os.path.join(templates_dir,"temp_front.html"), "w", "utf-8")
         tmp_front.write(unicode(content))
         tmp_front.close()
-        pages.append("temp_front.html")
+        pages.append(os.path.join(templates_dir, "temp_front.html"))
     else:
         # If it is for a responsible, use the certificate_resp.html template
 
         # Reads the certificate_resp.html template
-        cert_html = codecs.open("certificate_resp.html", "r", "utf-8")
+        cert_html = codecs.open(os.path.join(templates_dir,"certificate_resp.html"), "r", "utf-8")
 
         # Fills the template content with the cert_data
         content = cert_html.read().format(**cert_data)
         cert_html.close()
 
         # Clear the temporary file to store this new template
-        open("temp_resp.html", "w").close()
+        open(os.path.join(templates_dir, "temp_resp.html"), "w").close()
 
         # Creates the temporary template with the filled cert_data
-        tmp_front = codecs.open("temp_resp.html", "w", "utf-8")
+        tmp_front = codecs.open(os.path.join(templates_dir,"temp_resp.html"), "w", "utf-8")
         tmp_front.write(unicode(content))
         tmp_front.close()
-        pages.append("temp_resp.html")
+        pages.append(os.path.join(templates_dir, "temp_resp.html"))
 
     if cert_data["content"] != "":
         # Do the same as the front, but now with the back of the certificate
-        cert_html = codecs.open("certificate_back.html", "r", "utf-8")
+        cert_html = codecs.open(os.path.join(templates_dir, "certificate_back.html"), "r", "utf-8")
         content = cert_html.read().format(**cert_data)
         cert_html.close()
-        open("temp_back.html", "w").close()
-        tmp_back = codecs.open("temp_back.html", "w", "utf-8")
+        open(os.path.join(templates_dir, "temp_back.html"), "w").close()
+        tmp_back = codecs.open(os.path.join(templates_dir, "temp_back.html"), "w", "utf-8")
         tmp_back.write(unicode(content))
         tmp_back.close()
-        pages.append("temp_back.html")
+        pages.append(os.path.join(templates_dir, "temp_back.html"))
 
     # Generate front and back
     if responsible is False:

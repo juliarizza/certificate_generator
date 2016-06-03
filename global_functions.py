@@ -2,19 +2,50 @@
 import os
 import sys
 import re
+from shutil import copyfile
 
 from PyQt4 import QtGui
 
-# If the platform is windows, we have to create the app folder in
+# If the platform is Windows, we have to create the app folder in
 # somewhere else than the place where it is installed
 if "win" in sys.platform:
+    # Creating app folders and copying files to them
     app_dir = "{0}\\Certifica\\".format(os.environ['APPDATA'])
+    if getattr(sys, "frozen", False):
+        root_dir = os.path.dirname(sys.path[0])
+    elif __file__:
+        root_dir = os.path.dirname(__file__)
+    templates_dir = os.path.join(app_dir, "templates")
+    images_dir = os.path.join(app_dir, "images")
     if not os.path.exists(app_dir):
         os.makedirs(app_dir)
-        os.makedirs(os.path.join(app_dir, "images"))
+        os.makedirs(images_dir)
         os.makedirs(os.path.join(app_dir, "signatures"))
+        os.makedirs(templates_dir)
+
+    # Verifies if it's a normal execution or installed app
+    try:
+        copyfile(os.path.join(root_dir, "background.png"),
+                 os.path.join(images_dir, "background.png"))
+        copyfile(os.path.join(root_dir, "favicon.ico"),
+                 os.path.join(images_dir, "favicon.ico"))
+    except IOError:
+        copyfile(os.path.join(root_dir, "images", "background.png"),
+                 os.path.join(images_dir, "background.png"))
+        copyfile(os.path.join(root_dir, "images", "favicon.ico"),
+                 os.path.join(images_dir, "favicon.ico"))
+
+    copyfile(os.path.join(root_dir, "certificate_back.html"),
+             os.path.join(templates_dir, "certificate_back.html"))
+    copyfile(os.path.join(root_dir, "certificate_resp.html"),
+             os.path.join(templates_dir, "certificate_resp.html"))
+    copyfile(os.path.join(root_dir, "certificate_front.html"),
+             os.path.join(templates_dir, "certificate_front.html"))
 else:
     app_dir = os.path.dirname(os.path.abspath(__file__))+"/"
+    root_dir = app_dir
+    templates_dir = app_dir
+    images_dir = os.path.join(app_dir, "images")
 
 # Font for titles
 titleFont = QtGui.QFont()

@@ -74,7 +74,7 @@ class InstitutionDataWidget(QtGui.QWidget):
             # fills the form with it
 
             # Read the .ini file
-            self.Config.read(app_dir+"institution.ini")
+            self.Config.read(os.path.join(app_dir, "institution.ini"))
 
             # Fills the Main info
             self.instNameLineEdit.setText(
@@ -158,7 +158,7 @@ class InstitutionDataWidget(QtGui.QWidget):
                                   u"da logo para o certificado!")
         else:
             # Open the .ini file
-            cfgfile = open(app_dir+"institution.ini", "wb")
+            cfgfile = open(os.path.join(app_dir, "institution.ini"), "wb")
 
             # If the sections of the .ini file already exists, do nothing
             # else, create the section
@@ -303,7 +303,7 @@ class ConfigMailWidget(QtGui.QWidget):
             self.errorMsg.setText(u"A senha precisa estar preenchida!")
         else:
             # Open the .ini file
-            cfgfile = open(app_dir+"institution.ini", "wb")
+            cfgfile = open(os.path.join(app_dir, "institution.ini"), "wb")
 
             # Verifies if the Mail section already exists
             # If not, creates it
