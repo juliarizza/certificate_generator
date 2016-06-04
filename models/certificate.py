@@ -40,12 +40,13 @@ def generate_certificate(path, cert_data, responsible=False):
                "margin-bottom": "0",
                "encoding": "UTF-8",
                "quiet": "",
-              }
+               }
 
     # Background path
     if "win" in sys.platform:
         cert_data["background"] = os.path.join(images_dir, "background.png")
-        cert_data["background"] = "file:///"+cert_data["background"].replace("\\", "/")
+        cert_data["background"] = "file:///"+cert_data["background"]\
+            .replace("\\", "/")
     else:
         cert_data["background"] = os.path.join(app_dir, "background.png")
 
@@ -60,10 +61,14 @@ def generate_certificate(path, cert_data, responsible=False):
         cert_data["logo"] = ""
 
     # Windows paths for images so wkhtmltopdf works. I hate Windows.
-    if "C:" in cert_data["logo"] and not "file:///" in cert_data["responsible_sig"]:
-        cert_data["logo"] = "file:///"+cert_data["logo"].replace("\\","/")
-        cert_data["responsible_sig"] = "file:///"+cert_data["responsible_sig"].replace("\\","/")
-        cert_data["institution_sig"] = "file:///"+cert_data["institution_sig"].replace("\\","/")
+    if "C:" in cert_data["logo"] and \
+            "file:///" not in cert_data["responsible_sig"]:
+        # Just normalize slashes
+        cert_data["logo"] = "file:///"+cert_data["logo"].replace("\\", "/")
+        cert_data["responsible_sig"] = "file:///"+cert_data["responsible_sig"]\
+            .replace("\\", "/")
+        cert_data["institution_sig"] = "file:///"+cert_data["institution_sig"]\
+            .replace("\\", "/")
 
     # Gets the generation date to insert into the certificate
     today = date.today()
@@ -95,7 +100,11 @@ def generate_certificate(path, cert_data, responsible=False):
         # If it is for a client, use the certificate_front.html template
 
         # Reads the certificate_front.html template
-        cert_html = codecs.open(os.path.join(templates_dir,"certificate_front.html"), "r", "utf-8")
+        cert_html = codecs.open(
+            os.path.join(templates_dir, "certificate_front.html"),
+            "r",
+            "utf-8"
+        )
 
         # Fills the template content with the cert_data
         content = cert_html.read().format(**cert_data)
@@ -105,7 +114,11 @@ def generate_certificate(path, cert_data, responsible=False):
         open(os.path.join(templates_dir, "temp_front.html"), "w").close()
 
         # Creates the temporary template with the filled cert_data
-        tmp_front = codecs.open(os.path.join(templates_dir,"temp_front.html"), "w", "utf-8")
+        tmp_front = codecs.open(
+            os.path.join(templates_dir, "temp_front.html"),
+            "w",
+            "utf-8"
+        )
         tmp_front.write(unicode(content))
         tmp_front.close()
         pages.append(os.path.join(templates_dir, "temp_front.html"))
@@ -113,7 +126,11 @@ def generate_certificate(path, cert_data, responsible=False):
         # If it is for a responsible, use the certificate_resp.html template
 
         # Reads the certificate_resp.html template
-        cert_html = codecs.open(os.path.join(templates_dir,"certificate_resp.html"), "r", "utf-8")
+        cert_html = codecs.open(
+            os.path.join(templates_dir, "certificate_resp.html"),
+            "r",
+            "utf-8"
+        )
 
         # Fills the template content with the cert_data
         content = cert_html.read().format(**cert_data)
@@ -123,18 +140,30 @@ def generate_certificate(path, cert_data, responsible=False):
         open(os.path.join(templates_dir, "temp_resp.html"), "w").close()
 
         # Creates the temporary template with the filled cert_data
-        tmp_front = codecs.open(os.path.join(templates_dir,"temp_resp.html"), "w", "utf-8")
+        tmp_front = codecs.open(
+            os.path.join(templates_dir, "temp_resp.html"),
+            "w",
+            "utf-8"
+        )
         tmp_front.write(unicode(content))
         tmp_front.close()
         pages.append(os.path.join(templates_dir, "temp_resp.html"))
 
     if cert_data["content"] != "":
         # Do the same as the front, but now with the back of the certificate
-        cert_html = codecs.open(os.path.join(templates_dir, "certificate_back.html"), "r", "utf-8")
+        cert_html = codecs.open(
+            os.path.join(templates_dir, "certificate_back.html"),
+            "r",
+            "utf-8"
+        )
         content = cert_html.read().format(**cert_data)
         cert_html.close()
         open(os.path.join(templates_dir, "temp_back.html"), "w").close()
-        tmp_back = codecs.open(os.path.join(templates_dir, "temp_back.html"), "w", "utf-8")
+        tmp_back = codecs.open(
+            os.path.join(templates_dir, "temp_back.html"),
+            "w",
+            "utf-8"
+        )
         tmp_back.write(unicode(content))
         tmp_back.close()
         pages.append(os.path.join(templates_dir, "temp_back.html"))

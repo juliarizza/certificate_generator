@@ -256,10 +256,12 @@ class CertificatesWidget(QtGui.QWidget):
             )
             institution_role = unicode(self.signatures[current_institution][2])
             try:
-                institution_name = unicode(self.Config.get("Main", "Name")).upper()
+                institution_name = unicode(self.Config.get("Main",
+                                                           "Name")).upper()
                 institution_register = unicode(self.Config.get("Main", "ID"))
             except:
-                self.errorMsg.setText(u"Cadastre os dados da aba Instituição primeiro!")
+                self.errorMsg.setText(u"Cadastre os dados da aba "
+                                      u"Instituição primeiro!")
                 return 0
 
             # Fills with the data
