@@ -2,18 +2,19 @@
 <head>
     <meta charset="utf-8" />
 </head>
-<body style="background: url(images/background.png) repeat; font-family: Arial;">
+<body style="background: url('{background}') repeat; font-family: Arial;">
     <img src="{logo}" alt="Logo da instituição" style="max-width: 300px; position: absolute; left: 100px; top: 50px;">
-    <center><h1 style="font-size: 72px; margin-top: 250px;">Certificado</h1></center>
-    <p style="margin: 50px 150px; font-size: 36px; text-align: justify; line-height: 150%;">Certificamos que <b>{name}</b>, portador(a) do CPF de número <b>{register}</b>, participou do/a <b>{event}</b> entre os dias {start_date} e {end_date}, totalizando <b>{hours} hora(s)</b>, realizado pelo/a <b>{institution}</b>, de CNPJ <b>{inst_register}</b>.</p>
+    <br /><br /><br /><br /><br /><br />
+    <center><h1 style="font-size: 72px;">Certificado</h1></center>
+    <p style="margin: 50px 150px; font-size: 36px; line-height: 150%;">Certificamos que <b>{name}</b>, portador(a) do CPF de número <b>{register}</b>, participou do/a <b>{event}</b> entre os dias {start_date} e {end_date}, totalizando <b>{hours} hora(s)</b>, realizado pelo/a <b>{institution}</b>, de CNPJ <b>{inst_register}</b>.</p>
 
     <div style="width: 30%; position: absolute; left: 200px; bottom: 100px;">
-        <center><img src="{institution_sig}.png"></center>
+        <center><img src="{institution_sig}"></center>
         <hr/>
         <center style="font-size:24px;">{role}</center>
     </div>
     <div style="width: 30%; position: absolute; left: 800px; bottom: 100px;">
-        <center><img src="{responsible_sig}.png"></center>
+        <center><img src="{responsible_sig}"></center>
         <hr/>
         <center style="font-size:24px;">Ministrante</center>
     </div>

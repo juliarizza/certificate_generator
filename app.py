@@ -1,9 +1,11 @@
-# -*- coding: utf-8 -*-a
+﻿# -*- coding: utf-8 -*-a
 import sys
+import os.path
 from PyQt4 import QtGui, QtCore
 
 from controllers import *
 from models import *
+from global_functions import images_dir
 
 
 class Window(QtGui.QMainWindow):
@@ -21,7 +23,7 @@ class Window(QtGui.QMainWindow):
         self.setWindowTitle("Certifica!")
         self.central_widget = QtGui.QStackedWidget()
         self.setCentralWidget(self.central_widget)
-        self.setWindowIcon(QtGui.QIcon('images/favicon.ico'))
+        self.setWindowIcon(QtGui.QIcon(os.path.join(images_dir, "favicon.ico")))
 
         # Institution menu #
         dataAction = QtGui.QAction("&Dados", self)
@@ -87,6 +89,8 @@ class Window(QtGui.QMainWindow):
         helpMenu = mainMenu.addMenu("&Ajuda")
         helpMenu.addAction(licenseAction)
         helpMenu.addAction(aboutAction)
+
+        self.list_certificates()
 
     def show_institution_data(self):
         """
