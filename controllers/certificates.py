@@ -241,11 +241,19 @@ class CertificatesWidget(QtGui.QWidget):
 
             # Current responsible
             responsible_id = unicode(self.signatures[current_responsible][0])
-            responsible_sig = os.path.join(app_dir, "signatures", "{0}.png".format(responsible_id))
+            responsible_sig = os.path.join(
+                app_dir,
+                "signatures",
+                "{0}.png".format(responsible_id)
+            )
 
             # Current institution
             institution_id = unicode(self.signatures[current_institution][0])
-            institution_sig = os.path.join(app_dir, "signatures", "{0}.png".format(institution_id))
+            institution_sig = os.path.join(
+                app_dir,
+                "signatures",
+                "{0}.png".format(institution_id)
+            )
             institution_role = unicode(self.signatures[current_institution][2])
             institution_name = unicode(self.Config.get("Main", "Name")).upper()
             institution_register = unicode(self.Config.get("Main", "ID"))
@@ -764,7 +772,8 @@ class GenerateSendThread(QtCore.QThread):
 
                 filepath = os.path.join(
                     unicode(self.save_folder),
-                    u''.join(i for i in unicode(client_data[0]) if ord(i) < 128)
+                    u''.join(i for i in unicode(client_data[0])
+                             if ord(i) < 128)
                     .upper()
                     .replace(" ", "")
                 )
@@ -780,7 +789,10 @@ class GenerateSendThread(QtCore.QThread):
                 n += 1
 
             # Gets responsible info
-            filepath = os.path.join(unicode(self.save_folder), u"responsible.pdf")
+            filepath = os.path.join(
+                unicode(self.save_folder),
+                u"responsible.pdf"
+            )
             self.cert_data["name"] = unicode(self.responsible[1]).upper()
             self.cert_data["register"] = unicode(self.responsible[4]).upper()
 
