@@ -48,7 +48,7 @@ def generate_certificate(path, cert_data, responsible=False):
         cert_data["background"] = "file:///"+cert_data["background"]\
             .replace("\\", "/")
     else:
-        cert_data["background"] = os.path.join(app_dir, "background.png")
+        cert_data["background"] = os.path.join(images_dir, "background.png")
 
     # Verifies if there is an existing logo
     for filename in os.listdir(os.path.join(app_dir, "images")):
