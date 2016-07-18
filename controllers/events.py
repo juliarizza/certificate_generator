@@ -131,7 +131,8 @@ class EventsListWidget(QtGui.QWidget):
                 QtGui.QMessageBox.Yes | QtGui.QMessageBox.No
             )
             if choice == QtGui.QMessageBox.Yes:
-                cursor.execute("DELETE FROM events WHERE id=?", str(event_id))
+                cursor.execute("DELETE FROM events WHERE id=?",
+                               (str(event_id),))
                 conn.commit()
             else:
                 pass
@@ -229,7 +230,7 @@ class EventDialog(QtGui.QDialog):
             # Select the existing client data
             cursor.execute(
                 "SELECT * FROM events WHERE id=?",
-                str(self.event_id)
+                (str(self.event_id),)
             )
             data = cursor.fetchone()
 

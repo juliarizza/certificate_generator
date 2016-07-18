@@ -442,7 +442,7 @@ class SignaturesListWidget(QtGui.QWidget):
                                        "{0}.png".format(str(sig_id))))
                 cursor.execute(
                     "DELETE FROM signatures WHERE id=?",
-                    str(sig_id)
+                    (str(sig_id),)
                 )
                 conn.commit()
             else:
@@ -533,7 +533,7 @@ class SignaturesDialog(QtGui.QDialog):
             # Select the signature data
             cursor.execute(
                 "SELECT * FROM signatures WHERE id=?",
-                str(self.sig_id)
+                (str(self.sig_id),)
             )
             data = cursor.fetchone()
 
@@ -624,7 +624,7 @@ class SignaturesDialog(QtGui.QDialog):
                 # Verifies if the signature already exists
                 cursor.execute(
                     "SELECT id FROM signatures WHERE register=?",
-                    [str(self.sigRegisterLineEdit.text())]
+                    (str(self.sigRegisterLineEdit.text()),)
                 )
                 existing_user = cursor.fetchone()
 

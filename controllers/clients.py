@@ -130,7 +130,7 @@ class ClientsListWidget(QtGui.QWidget):
             if choice == QtGui.QMessageBox.Yes:
                 cursor.execute(
                     "DELETE FROM clients WHERE id=?",
-                    str(client_id)
+                    (str(client_id),)
                 )
                 conn.commit()
             else:
@@ -218,7 +218,7 @@ class ClientDialog(QtGui.QDialog):
             # Select the existing client data
             cursor.execute(
                 "SELECT * FROM clients WHERE id=?",
-                str(self.client_id)
+                (str(self.client_id),)
             )
             data = cursor.fetchone()
 
@@ -275,7 +275,7 @@ class ClientDialog(QtGui.QDialog):
                 # register an existent client
                 cursor.execute(
                     "SELECT id FROM clients WHERE register=?",
-                    [str(self.clientRegisterLineEdit.text())]
+                    (str(self.clientRegisterLineEdit.text()),)
                 )
                 existing_user = cursor.fetchone()
 

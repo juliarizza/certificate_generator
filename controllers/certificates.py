@@ -138,7 +138,7 @@ class CertificatesWidget(QtGui.QWidget):
         if self.events:
             cursor.execute(
                 "SELECT id,client_id FROM subscriptions WHERE event_id=?",
-                str(self.events[self.eventsList.currentIndex()][0])
+                (str(self.events[self.eventsList.currentIndex()][0]),)
             )
             self.clients = cursor.fetchall()
         else:
@@ -152,7 +152,7 @@ class CertificatesWidget(QtGui.QWidget):
         for client in self.clients:
             cursor.execute(
                 "SELECT name FROM clients WHERE id=?",
-                str(client[1])
+                (str(client[1]),)
             )
             client_name = cursor.fetchone()
             if client:
@@ -192,7 +192,7 @@ class CertificatesWidget(QtGui.QWidget):
             if choice == QtGui.QMessageBox.Yes:
                 cursor.execute(
                     "DELETE FROM subscriptions WHERE id=?",
-                    str(subscription_id)
+                    (str(subscription_id),)
                 )
                 conn.commit()
             else:
@@ -282,7 +282,7 @@ class CertificatesWidget(QtGui.QWidget):
             # to generate it's certificate
             cursor.execute(
                 "SELECT * FROM signatures WHERE id=?",
-                str(self.signatures[current_responsible][0])
+                (str(self.signatures[current_responsible][0]),)
             )
             self.responsible = cursor.fetchone()
 
@@ -562,7 +562,7 @@ class GenerateThread(QtCore.QThread):
                 cursor.execute(
                     "SELECT name,register FROM clients \
                     WHERE id=?",
-                    str(client[1])
+                    (str(client[1]),)
                 )
                 client_data = cursor.fetchone()
                 self.cert_data["name"] = unicode(client_data[0]).upper()
@@ -772,7 +772,7 @@ class GenerateSendThread(QtCore.QThread):
                 # Get client info
                 cursor.execute(
                     "SELECT name,email FROM clients WHERE id=?",
-                    str(client[1])
+                    (str(client[1]),)
                 )
                 client_data = cursor.fetchone()
 
