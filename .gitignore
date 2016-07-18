@@ -23,3 +23,6 @@ logo.gif
 temp_front.html
 temp_back.html
 temp_resp.html
+
+## Compiled files
+*.exe
