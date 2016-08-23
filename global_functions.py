@@ -8,7 +8,7 @@ from PyQt4 import QtGui
 
 # If the platform is Windows, we have to create the app folder in
 # somewhere else than the place where it is installed
-if "win" in sys.platform:
+if sys.platform == "win32":
     # Creating app folders and copying files to them
     app_dir = "{0}\\Certifica\\".format(os.environ['APPDATA'])
     if getattr(sys, "frozen", False):

@@ -10,7 +10,6 @@ build_exe_options = {"packages": ["PyPDF2", "pdfkit", "email"],
                                        "certificate_front.html",
                                        "certificate_resp.html"
                                       ],
-#                     "include_msvcr": True,
                     }
 
 base = None
